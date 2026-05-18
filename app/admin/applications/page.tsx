@@ -11,9 +11,7 @@ export default async function ApplicationsPage() {
 
   if (hasSupabaseConfig()) {
     const supabase = supabaseAdmin();
-    // Using any to bypass strict typing on the dynamic insert signature in types,
-    // though select usually works fine if Database types are generated properly.
-    const { data } = await (supabase as any)
+    const { data } = await supabase
       .from("join_applications")
       .select("*")
       .order("created_at", { ascending: false });

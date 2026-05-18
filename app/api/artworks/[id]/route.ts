@@ -56,6 +56,7 @@ export async function PATCH(
     ...parsed.data,
     updated_at: new Date().toISOString()
   };
+  // @ts-expect-error Supabase typed client Update type conflicts with Partial<Artwork> at build time
   const { data, error } = await supabase
     .from("artworks")
     .update(updatePayload)

@@ -3,7 +3,6 @@ import { cookies } from "next/headers";
 import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase";
 import { AVAILABILITY, PUBLICATION_STATUS } from "@/lib/categories";
-import type { Artwork } from "@/lib/types";
 
 async function verifyAdmin() {
   const cookieToken = (await cookies()).get("asa_admin")?.value;
@@ -52,14 +51,20 @@ export async function PATCH(
   }
 
   const supabase = supabaseAdmin();
-  const updatePayload: Partial<Artwork> = {
-    ...parsed.data,
-    updated_at: new Date().toISOString()
+
+  const updateClient = supabase as ReturnType<typeof supabaseAdmin> & {
+    from(table: "artworks"): {
+      update(value: unknown): {
+        eq(column: string, value: string): {
+          select(columns: string): { single(): Promise<{ data: unknown; error: unknown }> };
+        };
+      };
+    };
   };
-  // @ts-expect-error Supabase typed client Update type conflicts with Partial<Artwork> at build time
-  const { data, error } = await supabase
+
+  const { data, error } = await updateClient
     .from("artworks")
-    .update(updatePayload)
+    .update({ ...parsed.data, updated_at: new Date().toISOString() })
     .eq("id", id)
     .select("*")
     .single();

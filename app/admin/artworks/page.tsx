@@ -2,7 +2,6 @@
 
 import { Archive, Edit, Tag, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -26,7 +25,6 @@ export default function AdminArtworksPage() {
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const router = useRouter();
 
   async function fetchArtworks() {
     const res = await fetch("/api/admin/artworks");

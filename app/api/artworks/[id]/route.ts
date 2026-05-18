@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase";
 import { AVAILABILITY, PUBLICATION_STATUS } from "@/lib/categories";
+import type { Artwork } from "@/lib/types";
 
 async function verifyAdmin() {
   const cookieToken = (await cookies()).get("asa_admin")?.value;
@@ -51,9 +52,13 @@ export async function PATCH(
   }
 
   const supabase = supabaseAdmin();
+  const updatePayload: Partial<Artwork> = {
+    ...parsed.data,
+    updated_at: new Date().toISOString()
+  };
   const { data, error } = await supabase
     .from("artworks")
-    .update({ ...parsed.data, updated_at: new Date().toISOString() })
+    .update(updatePayload)
     .eq("id", id)
     .select("*")
     .single();

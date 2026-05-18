@@ -4,13 +4,18 @@ import { notFound } from "next/navigation";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { formatPrice } from "@/lib/format";
-import { getArtwork } from "@/lib/artworks";
+import { cookies } from "next/headers";
+import { getArtwork, getArtworkAdmin } from "@/lib/artworks";
 
-export const revalidate = 30;
+export const dynamic = "force-dynamic";
 
 export default async function ArtworkDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const art = await getArtwork(id);
+  
+  const cookieToken = (await cookies()).get("asa_admin")?.value;
+  const isAdmin = Boolean(process.env.ADMIN_UPLOAD_TOKEN && cookieToken === process.env.ADMIN_UPLOAD_TOKEN);
+  
+  const art = isAdmin ? await getArtworkAdmin(id) : await getArtwork(id);
   if (!art) notFound();
 
   return (

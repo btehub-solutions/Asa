@@ -19,23 +19,54 @@ export async function listPublishedArtworks() {
   return data ?? [];
 }
 
+// Public-facing artwork fetch — only returns Published artworks
 export async function getArtwork(idOrSlug: string) {
   if (!hasSupabaseConfig()) {
     return demoArtworks.find((art) => art.id === idOrSlug || art.slug === idOrSlug) ?? null;
   }
 
-  // Use admin client so draft artworks are accessible for admin previews
-  const supabase = supabaseAdmin();
-  const { data, error } = await supabase
-    .from("artworks")
-    .select("*")
-    .or(`id.eq.${idOrSlug},slug.eq.${idOrSlug}`)
-    .maybeSingle();
+  try {
+    const supabase = supabaseBrowser();
+    const { data, error } = await supabase
+      .from("artworks")
+      .select("*")
+      .or(`id.eq.${idOrSlug},slug.eq.${idOrSlug}`)
+      .maybeSingle();
 
-  if (error) {
-    console.error(error);
+    if (error) {
+      console.error(error);
+      return null;
+    }
+
+    return data;
+  } catch (err) {
+    console.error(err);
     return null;
   }
+}
 
-  return data;
+// Admin-only artwork fetch — bypasses RLS, returns any status (Draft, Published, Archived)
+export async function getArtworkAdmin(idOrSlug: string) {
+  if (!hasSupabaseConfig()) {
+    return demoArtworks.find((art) => art.id === idOrSlug || art.slug === idOrSlug) ?? null;
+  }
+
+  try {
+    const supabase = supabaseAdmin();
+    const { data, error } = await supabase
+      .from("artworks")
+      .select("*")
+      .or(`id.eq.${idOrSlug},slug.eq.${idOrSlug}`)
+      .maybeSingle();
+
+    if (error) {
+      console.error(error);
+      return null;
+    }
+
+    return data;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
 }

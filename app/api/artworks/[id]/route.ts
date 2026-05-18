@@ -88,14 +88,27 @@ export async function DELETE(
   const { id } = await params;
   const supabase = supabaseAdmin();
 
+  const queryClient = supabase as ReturnType<typeof supabaseAdmin> & {
+    from(table: "artworks"): {
+      select(columns: string): {
+        eq(column: string, value: string): {
+          single(): Promise<{ data: { image_url: string; extra_image_urls: string[]; artist_image_url: string | null } | null; error: unknown }>;
+        };
+      };
+      delete(): {
+        eq(column: string, value: string): Promise<{ error: unknown }>;
+      };
+    };
+  };
+
   // Fetch image URLs before deleting so we can clean up storage
-  const { data: artwork } = await supabase
+  const { data: artwork } = await queryClient
     .from("artworks")
     .select("image_url, extra_image_urls, artist_image_url")
     .eq("id", id)
     .single();
 
-  const { error } = await supabase.from("artworks").delete().eq("id", id);
+  const { error } = await queryClient.from("artworks").delete().eq("id", id);
 
   if (error) {
     console.error(error);

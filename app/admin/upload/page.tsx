@@ -41,7 +41,15 @@ export default function AdminUploadPage() {
     setPreviews((items) => ({ ...items, [name]: file ? URL.createObjectURL(file) : null }));
   }
 
-  async function submit(formData: FormData) {
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+    
+    if (submitter?.name === "intent_status") {
+      formData.set("intent_status", submitter.value);
+    }
+
     const finalCategories = categories.includes("Others") && others.trim()
       ? [...categories.filter((category) => category !== "Others"), `Others: ${others.trim()}`]
       : categories;
@@ -81,7 +89,7 @@ export default function AdminUploadPage() {
               ))}
             </aside>
 
-            <form action={submit} className="panel wood-frame" style={{ padding: "clamp(1rem, 3vw, 2rem)", display: "grid", gap: "1.6rem" }}>
+            <form onSubmit={submit} className="panel wood-frame" style={{ padding: "clamp(1rem, 3vw, 2rem)", display: "grid", gap: "1.6rem" }}>
               <FormSection n="01" title="Artist Information" sub="Tell the artist's story with enough warmth for collectors and enough clarity for the admin team.">
                 <div className="responsive-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 14 }}>
                   {baseFields.map(([name, label, placeholder, required]) => (

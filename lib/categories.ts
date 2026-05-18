@@ -1,0 +1,36 @@
+export const CATEGORIES = [
+  "Visual Artists",
+  "Painters",
+  "Sculptors",
+  "Textile Artists",
+  "Photographers",
+  "Digital Artists",
+  "Mixed Media Artists",
+  "Illustrators",
+  "Pencil & Drawing Artists",
+  "Ceramic Artists",
+  "Wood Carving Artists",
+  "Bead Artists",
+  "Installation Artists",
+  "Street Artists",
+  "Mural Artists",
+  "Contemporary African Artists",
+  "Traditional African Artists",
+  "Abstract Artists",
+  "Portrait Artists",
+  "Fashion & Wearable Art Designers",
+  "Calligraphy Artists",
+  "Printmakers",
+  "Mosaic Artists",
+  "Fiber Artists",
+  "Craft Artists",
+  "Adire Artists",
+  "Yoruba Cultural Artists",
+  "Indigenous Craft Artists",
+  "African Heritage Artists",
+  "Afrocentric Artists",
+  "Others"
+] as const;
+
+export const AVAILABILITY = ["For Sale", "Not for Sale", "Sold"] as const;
+export const PUBLICATION_STATUS = ["Draft", "Published", "Archived"] as const;

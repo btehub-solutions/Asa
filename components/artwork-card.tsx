@@ -7,7 +7,7 @@ export function ArtworkCard({ artwork }: { artwork: Artwork }) {
   return (
     <Link href={`/artwork/${artwork.slug || artwork.id}`} className="panel card-hover" style={{ display: "block", overflow: "hidden" }}>
       <div style={{ aspectRatio: "4 / 5", background: "var(--panel-2)", overflow: "hidden", position: "relative" }}>
-        <Image src={artwork.image_url} alt={artwork.title} fill sizes="(max-width: 768px) 100vw, 320px" style={{ objectFit: "cover" }} />
+        <Image src={artwork.image_url} alt={artwork.title} fill sizes="(max-width: 768px) 100vw, 320px" style={{ objectFit: "contain" }} />
       </div>
       <div style={{ padding: "1rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "start" }}>

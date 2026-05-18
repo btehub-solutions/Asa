@@ -59,37 +59,11 @@ export default function EditArtworkPage({ params }: { params: Promise<{ id: stri
 
     setStatus("loading");
     setMessage("");
-
-    // Patch fields (non-image data)
-    const patchBody = {
-      title: formData.get("title") as string,
-      artist_name: formData.get("artist_name") as string,
-      medium: formData.get("medium") as string,
-      year_created: formData.get("year_created") as string || null,
-      dimensions: formData.get("dimensions") as string || null,
-      price: formData.get("price") ? Number(formData.get("price")) : null,
-      nationality: formData.get("nationality") as string || null,
-      city_base: formData.get("city_base") as string || null,
-      year_active: formData.get("year_active") as string || null,
-      cultural_roots: formData.get("cultural_roots") as string || null,
-      artist_quote: formData.get("artist_quote") as string || null,
-      artist_bio: formData.get("artist_bio") as string || null,
-      artist_story: formData.get("artist_story") as string || null,
-      cultural_significance: formData.get("cultural_significance") as string || null,
-      piece_story: formData.get("piece_story") as string || null,
-      yoruba_connection: formData.get("yoruba_connection") as string || null,
-      admin_notes: formData.get("admin_notes") as string || null,
-      commission_rate: formData.get("commission_rate") ? Number(formData.get("commission_rate")) : null,
-      availability: formData.get("availability") as string,
-      publication_status: formData.get("publication_status") as string,
-      categories: finalCategories,
-      tags: (formData.get("tags") as string)?.split(",").map((t) => t.trim()).filter(Boolean) ?? [],
-    };
+    formData.set("categories", JSON.stringify(finalCategories));
 
     const res = await fetch(`/api/artworks/${id}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(patchBody),
+      body: formData,
     });
 
     const data = await res.json().catch(() => ({}));

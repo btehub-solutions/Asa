@@ -77,9 +77,16 @@ export default async function ArtworkDetailPage({ params }: { params: Promise<{ 
             ) : null}
           </section>
         </div>
-        {(art.artist_bio || art.piece_story) ? (
+        {(art.artist_image_url || art.artist_bio || art.artist_story || art.piece_story) ? (
           <div className="two-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.4rem", marginTop: "3rem" }}>
-            {art.artist_bio ? <InfoBlock title="About the Artist" text={art.artist_bio} /> : null}
+            {(art.artist_image_url || art.artist_bio || art.artist_story) ? (
+              <ArtistProfileBlock
+                artistName={art.artist_name}
+                imageUrl={art.artist_image_url}
+                bio={art.artist_bio}
+                story={art.artist_story}
+              />
+            ) : null}
             {art.piece_story ? <InfoBlock title="Story Behind This Work" text={art.piece_story} /> : null}
           </div>
         ) : null}
@@ -94,6 +101,34 @@ function InfoBlock({ title, text }: { title: string; text: string }) {
     <section className="panel" style={{ padding: "1rem 1.1rem", marginBottom: "0.8rem" }}>
       <p className="eyebrow">{title}</p>
       <p className="muted" style={{ lineHeight: 1.8, marginBottom: 0 }}>{text}</p>
+    </section>
+  );
+}
+
+function ArtistProfileBlock({
+  artistName,
+  imageUrl,
+  bio,
+  story,
+}: {
+  artistName: string;
+  imageUrl: string | null;
+  bio: string | null;
+  story: string | null;
+}) {
+  return (
+    <section className="panel" style={{ display: "grid", gap: "1rem", marginBottom: "0.8rem", overflow: "hidden", padding: "1rem 1.1rem" }}>
+      {imageUrl ? (
+        <div style={{ background: "var(--panel-2)", border: "1px solid var(--border)", borderRadius: 8, height: 280, overflow: "hidden", position: "relative" }}>
+          <Image src={imageUrl} alt={artistName} fill sizes="(max-width: 768px) 100vw, 420px" style={{ objectFit: "cover", objectPosition: "center top" }} />
+        </div>
+      ) : null}
+      <div>
+        <p className="eyebrow">About the Artist</p>
+        <h2 className="serif" style={{ color: "var(--cream)", fontSize: "1.35rem", fontWeight: 400, margin: "0 0 0.6rem" }}>{artistName}</h2>
+        {bio ? <p className="muted" style={{ lineHeight: 1.8, marginBottom: story ? "0.9rem" : 0 }}>{bio}</p> : null}
+        {story ? <p className="muted" style={{ lineHeight: 1.8, marginBottom: 0 }}>{story}</p> : null}
+      </div>
     </section>
   );
 }

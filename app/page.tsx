@@ -55,7 +55,7 @@ export default async function HomePage() {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 0.74fr", gap: 12 }}>
               {featured.slice(0, 3).map((art, index) => (
                 <Link key={art.id} href={`/artwork/${art.slug || art.id}`} className="panel card-hover" style={{ minHeight: index === 0 ? 360 : 174, gridRow: index === 0 ? "span 2" : undefined, overflow: "hidden", position: "relative" }}>
-                  <Image src={art.image_url} alt={art.title} fill sizes="420px" style={{ objectFit: "cover" }} />
+                  <Image src={art.image_url} alt={art.title} fill sizes="420px" style={{ objectFit: "contain" }} />
                   <span style={{ background: "linear-gradient(transparent, rgba(28,15,5,0.92))", inset: 0, position: "absolute" }} />
                   <span className="serif" style={{ bottom: 16, color: "var(--cream)", fontSize: index === 0 ? 25 : 16, left: 16, position: "absolute", right: 16 }}>{art.title}</span>
                 </Link>
@@ -169,8 +169,8 @@ function SectionHead({ eyebrow, title, aside }: { eyebrow: string; title: string
 function ArtistCard({ artist }: { artist: ReturnType<typeof uniqueArtists>[number] }) {
   return (
     <article className="panel card-hover wood-frame" style={{ overflow: "hidden" }}>
-      <div style={{ background: "var(--panel-2)", height: 210, position: "relative" }}>
-        {artist.image ? <Image src={artist.image} alt={artist.name} fill sizes="360px" style={{ objectFit: "cover" }} /> : <div className="adire" style={{ height: "100%" }} />}
+      <div style={{ background: "var(--panel-2)", height: 240, position: "relative" }}>
+        {artist.image ? <Image src={artist.image} alt={artist.name} fill sizes="360px" style={{ objectFit: "cover", objectPosition: "center top" }} /> : <div className="adire" style={{ height: "100%" }} />}
       </div>
       <div style={{ padding: "1.15rem" }}>
         <p className="eyebrow">{artist.roots}</p>

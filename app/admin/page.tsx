@@ -14,7 +14,7 @@ export default function AdminDashboardPage() {
         <p className="muted" style={{ maxWidth: 680, lineHeight: 1.8 }}>Manage the curated consignment workflow, publish new artworks, and prepare artist stories for collectors.</p>
         <div className="responsive-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginTop: "2rem" }}>
           <AdminCard href="/admin/upload" icon={<Upload size={24} />} title="Upload New Artwork" text="Add artist information, artwork images, cultural storytelling, and publication status." />
-          <AdminCard href="/join" icon={<Users size={24} />} title="Artist Applications" text="Review the public artist onboarding flow and consignment positioning." />
+          <AdminCard href="/admin/applications" icon={<Users size={24} />} title="Artist Applications" text="Review applications, read artist messages, and contact potential partners." />
           <AdminCard href="/ask-ai" icon={<WandSparkles size={24} />} title="AI Coach" text="Preview the collector-facing AI art guide." />
         </div>
       </main>

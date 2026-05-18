@@ -260,7 +260,7 @@ export default function EditArtworkPage({ params }: { params: Promise<{ id: stri
                 <button className="btn btn-ghost" name="intent_status" value="Draft" disabled={status === "loading"}>
                   <Save size={16} /> Save as Draft
                 </button>
-                <button className="btn btn-ghost" type="button" onClick={() => window.open(`/artworks/${artwork.slug}`, "_blank")}>
+                <button className="btn btn-ghost" type="button" onClick={() => window.open(`/artwork/${artwork.slug}`, "_blank")}>
                   <Eye size={16} /> Preview
                 </button>
                 <button className="btn btn-primary" name="intent_status" value="Published" disabled={status === "loading"}>

@@ -1,5 +1,5 @@
 import { demoArtworks } from "./demo-data";
-import { hasSupabaseConfig, supabaseBrowser } from "./supabase";
+import { hasSupabaseConfig, supabaseAdmin, supabaseBrowser } from "./supabase";
 
 export async function listPublishedArtworks() {
   if (!hasSupabaseConfig()) return demoArtworks;
@@ -24,7 +24,8 @@ export async function getArtwork(idOrSlug: string) {
     return demoArtworks.find((art) => art.id === idOrSlug || art.slug === idOrSlug) ?? null;
   }
 
-  const supabase = supabaseBrowser();
+  // Use admin client so draft artworks are accessible for admin previews
+  const supabase = supabaseAdmin();
   const { data, error } = await supabase
     .from("artworks")
     .select("*")

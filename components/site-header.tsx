@@ -7,7 +7,7 @@ import { Logo } from "./logo";
 const links = [
   { href: "/gallery", label: "Gallery" },
   { href: "/categories", label: "Shop by Category" },
-  { href: "/ask-ai", label: "Ask AI" },
+  { href: "/ask-ai", label: "Ask Atọ́ka" },
   { href: "/join", label: "Join Àṣà" },
   { href: "/about", label: "About" }
 ];

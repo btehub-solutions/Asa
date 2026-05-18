@@ -15,7 +15,7 @@ export default function AdminDashboardPage() {
         <div className="responsive-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginTop: "2rem" }}>
           <AdminCard href="/admin/upload" icon={<Upload size={24} />} title="Upload New Artwork" text="Add artist information, artwork images, cultural storytelling, and publication status." />
           <AdminCard href="/admin/applications" icon={<Users size={24} />} title="Artist Applications" text="Review applications, read artist messages, and contact potential partners." />
-          <AdminCard href="/ask-ai" icon={<WandSparkles size={24} />} title="AI Coach" text="Preview the collector-facing AI art guide." />
+          <AdminCard href="/ask-ai" icon={<WandSparkles size={24} />} title="Atọ́ka (AI Coach)" text="Preview the collector-facing AI art guide." />
         </div>
       </main>
       <SiteFooter />

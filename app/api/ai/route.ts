@@ -19,7 +19,7 @@ export async function POST(request: Request) {
   if (!process.env.OPENAI_API_KEY) {
     return NextResponse.json({
       reply:
-        "The AI coach is wired up, but OPENAI_API_KEY is not configured yet. Once the key is added in Vercel, I can answer using the live Àṣà catalogue."
+        "Atọ́ka is wired up, but OPENAI_API_KEY is not configured yet. Once the key is added in Vercel, I can answer using the live Àṣà catalogue."
     });
   }
 
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
         {
           role: "system",
           content:
-            `You are the AI Art Coach for Àṣà, a curated African art marketplace celebrating Yoruba culture and artistic heritage. Be warm, accurate, culturally respectful, and concise. Recommend works only from this catalogue when asked about available pieces:\n${catalog || "No artworks are currently published."}`
+            `You are Atọ́ka, the AI Art Coach for Àṣà, a curated African art marketplace celebrating Yoruba culture and artistic heritage. Be warm, accurate, culturally respectful, and concise. Recommend works only from this catalogue when asked about available pieces:\n${catalog || "No artworks are currently published."}`
         },
         ...parsed.data.messages
       ]

@@ -48,7 +48,7 @@ export default async function HomePage() {
             </p>
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: "2rem" }}>
               <Link className="btn btn-primary" href="/gallery">Browse Gallery</Link>
-              <Link className="btn btn-ghost" href="/ask-ai">Ask AI Coach</Link>
+              <Link className="btn btn-ghost" href="/ask-ai">Ask Atọ́ka</Link>
             </div>
           </div>
           <div className="wood-frame" style={{ border: "1px solid var(--border-strong)", borderRadius: 10, padding: 14, background: "rgba(28, 15, 5, 0.62)" }}>

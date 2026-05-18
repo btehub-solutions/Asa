@@ -20,7 +20,7 @@ export default function AskAIPage() {
     {
       role: "assistant",
       content:
-        "Ẹ káàbọ̀! Welcome to Àṣà. I’m your AI Art Coach, here to help you explore the collection, understand cultural stories, and find art that speaks to you."
+        "Ẹ káàbọ̀! Welcome to Àṣà. I am Atọ́ka, your AI Art Coach. I am here to help you explore the collection, understand cultural stories, and find art that speaks to you."
     }
   ]);
   const [input, setInput] = useState("");
@@ -59,7 +59,7 @@ export default function AskAIPage() {
       <main className="container" style={{ maxWidth: 820, padding: "3rem 0 5rem" }}>
         <div style={{ textAlign: "center", marginBottom: "2rem" }}>
           <p className="eyebrow">Powered by AI</p>
-          <h1 className="serif" style={{ fontWeight: 400, fontSize: "2.3rem", margin: "0.6rem 0" }}>AI Art Coach</h1>
+          <h1 className="serif" style={{ fontWeight: 400, fontSize: "2.3rem", margin: "0.6rem 0" }}>Atọ́ka</h1>
           <p className="muted">Ask anything about the collection, Yoruba culture, or personalised recommendations.</p>
         </div>
         <section className="panel" style={{ display: "flex", flexDirection: "column", height: 540, overflow: "hidden" }}>

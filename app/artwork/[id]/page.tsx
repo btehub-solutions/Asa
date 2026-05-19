@@ -21,31 +21,31 @@ export default async function ArtworkDetailPage({ params }: { params: Promise<{ 
   return (
     <>
       <SiteHeader />
-      <main className="container" style={{ padding: "3rem 0 5rem" }}>
-        <Link href="/" className="eyebrow" style={{ display: "inline-block", marginBottom: "2rem", color: "var(--muted)" }}>Back to gallery</Link>
-        <div className="two-col" style={{ display: "grid", gridTemplateColumns: "1.05fr 0.95fr", gap: "3rem", alignItems: "start" }}>
+      <main className="container artwork-main-container">
+        <Link href="/" className="eyebrow" style={{ display: "inline-block", marginBottom: "1.5rem", color: "var(--muted)" }}>Back to gallery</Link>
+        <div className="artwork-layout">
           <div>
-            <div className="panel adire" style={{ minHeight: 420, position: "relative", overflow: "hidden" }}>
-              <Image src={art.image_url} alt={art.title} width={1100} height={1300} priority style={{ width: "100%", height: "auto", maxHeight: "72vh", objectFit: "contain", position: "relative", zIndex: 1, display: "block" }} />
+            <div className="panel adire artwork-image-wrapper">
+              <Image src={art.image_url} alt={art.title} width={1100} height={1300} priority className="artwork-image" />
             </div>
             {art.extra_image_urls.length ? (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(92px, 1fr))", gap: 10, marginTop: 10 }}>
+              <div className="artwork-thumbnail-gallery">
                 {art.extra_image_urls.map((image) => (
-                  <Image key={image} src={image} alt="" width={180} height={180} style={{ aspectRatio: "1", objectFit: "cover", border: "1px solid var(--border)", borderRadius: 5 }} />
+                  <Image key={image} src={image} alt="" width={180} height={180} className="artwork-thumbnail" />
                 ))}
               </div>
             ) : null}
           </div>
           <section>
             <p className="eyebrow">Artwork</p>
-            <h1 className="serif" style={{ fontSize: "clamp(2rem, 5vw, 3.2rem)", fontWeight: 400, lineHeight: 1.08, margin: "0.7rem 0 0.25rem" }}>{art.title}</h1>
-            <p className="muted" style={{ margin: "0 0 1.4rem", fontSize: "1.05rem" }}>by {art.artist_name}</p>
+            <h1 className="serif artwork-title">{art.title}</h1>
+            <p className="muted artwork-artist">by {art.artist_name}</p>
             {art.artist_quote ? (
-              <blockquote className="serif" style={{ borderLeft: "3px solid var(--gold)", color: "var(--gold-light)", fontStyle: "italic", margin: "0 0 1.4rem", paddingLeft: "1rem" }}>
+              <blockquote className="serif artwork-quote">
                 “{art.artist_quote}”
               </blockquote>
             ) : null}
-            <div style={{ borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", padding: "1rem 0", marginBottom: "1.2rem", display: "grid", gap: 12 }}>
+            <div className="artwork-details-list">
               {[
                 ["Medium", art.medium],
                 ["Year", art.year_created],
@@ -62,7 +62,7 @@ export default async function ArtworkDetailPage({ params }: { params: Promise<{ 
                 <span className="serif" style={{ color: "var(--gold-light)", fontSize: "1.45rem" }}>{formatPrice(art.price)}</span>
               </p>
             </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: "1.2rem" }}>
+            <div className="artwork-tags">
               {art.categories.map((category) => (
                 <span key={category} style={{ border: "1px solid var(--border)", borderRadius: 999, color: "var(--gold)", fontSize: 12, padding: "0.28rem 0.7rem" }}>{category}</span>
               ))}
@@ -70,15 +70,21 @@ export default async function ArtworkDetailPage({ params }: { params: Promise<{ 
             {art.cultural_significance ? <InfoBlock title="Cultural Significance" text={art.cultural_significance} /> : null}
             {art.yoruba_connection ? <InfoBlock title="Yoruba Connection" text={art.yoruba_connection} /> : null}
             {art.availability !== "Sold" && art.price != null ? (
-              <div className="panel kente-top" style={{ marginTop: "1rem", padding: "1.2rem" }}>
-                <p className="eyebrow">Interested in this work?</p>
-                <p className="muted" style={{ lineHeight: 1.7 }}>Contact the Àṣà team to inquire about this piece and arrange purchase.</p>
+              <div className="panel kente-top mobile-no-panel" style={{ marginTop: "1.5rem", padding: "1.5rem" }}>
+                <p className="eyebrow" style={{ fontSize: "0.75rem", letterSpacing: "0.2em", marginBottom: "0.6rem" }}>Acquire this piece</p>
+                <p className="muted" style={{ lineHeight: 1.6, marginBottom: "1.5rem" }}>
+                  Contact the Àṣà team to reserve this artwork or propose a private offer.
+                </p>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "0.8rem" }}>
+                  <a href={`mailto:hello@asa.com?subject=Inquiry: ${art.title}`} className="btn btn-primary" style={{ width: "100%" }}>Inquire to Buy</a>
+                  <a href={`mailto:hello@asa.com?subject=Offer: ${art.title}`} className="btn btn-ghost" style={{ width: "100%", background: "var(--panel-2)" }}>Make an Offer</a>
+                </div>
               </div>
             ) : null}
           </section>
         </div>
         {(art.artist_image_url || art.artist_bio || art.artist_story || art.piece_story) ? (
-          <div className="two-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.4rem", marginTop: "3rem" }}>
+          <div className="artwork-about-grid">
             {(art.artist_image_url || art.artist_bio || art.artist_story) ? (
               <ArtistProfileBlock
                 artistName={art.artist_name}
@@ -98,7 +104,7 @@ export default async function ArtworkDetailPage({ params }: { params: Promise<{ 
 
 function InfoBlock({ title, text }: { title: string; text: string }) {
   return (
-    <section className="panel" style={{ padding: "1rem 1.1rem", marginBottom: "0.8rem" }}>
+    <section className="panel mobile-no-panel" style={{ padding: "1rem 1.1rem", marginBottom: "0.8rem" }}>
       <p className="eyebrow">{title}</p>
       <p className="muted" style={{ lineHeight: 1.8, marginBottom: 0 }}>{text}</p>
     </section>
@@ -117,9 +123,9 @@ function ArtistProfileBlock({
   story: string | null;
 }) {
   return (
-    <section className="panel" style={{ display: "grid", gap: "1rem", marginBottom: "0.8rem", overflow: "hidden", padding: "1rem 1.1rem" }}>
+    <section className="panel mobile-no-panel" style={{ display: "grid", gap: "1rem", marginBottom: "0.8rem", overflow: "hidden", padding: "1rem 1.1rem" }}>
       {imageUrl ? (
-        <div style={{ background: "var(--panel-2)", border: "1px solid var(--border)", borderRadius: 8, height: 280, overflow: "hidden", position: "relative" }}>
+        <div className="artist-profile-img">
           <Image src={imageUrl} alt={artistName} fill sizes="(max-width: 768px) 100vw, 420px" style={{ objectFit: "cover", objectPosition: "center top" }} />
         </div>
       ) : null}

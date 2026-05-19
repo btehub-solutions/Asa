@@ -74,7 +74,7 @@ export default async function HomePage() {
         <section className="section-shell" style={{ background: "linear-gradient(180deg, rgba(46,26,10,0.36), transparent)" }}>
           <div className="container">
             <SectionHead eyebrow="Featured voices" title="Yoruba & African Artists" />
-            <div className="responsive-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18 }}>
+            <div className="responsive-grid swipe-mobile" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18 }}>
               {artists.map((artist) => <ArtistCard key={artist.name} artist={artist} />)}
             </div>
           </div>
@@ -82,12 +82,14 @@ export default async function HomePage() {
 
         <section className="container section-shell">
           <SectionHead eyebrow="Browse by tradition" title="Shop by Category" />
-          <div className="responsive-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+          <div className="responsive-grid swipe-mobile" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
             {categoryFeatures.map(([name, description], index) => (
-              <Link key={name} href="/categories" className="panel card-hover wood-frame" style={{ padding: "1.2rem", minHeight: 142 }}>
-                <span style={{ color: "var(--gold-light)", fontSize: 22 }}>{["✣", "◈", "●", "◆", "✦", "◎"][index]}</span>
-                <h3 className="serif" style={{ fontSize: "1.25rem", fontWeight: 400, margin: "0.7rem 0 0.35rem" }}>{name}</h3>
-                <p className="muted" style={{ fontSize: 14, lineHeight: 1.65, margin: 0 }}>{description}</p>
+              <Link key={name} href="/categories" className="category-card card-hover">
+                <span className="category-card-num serif">{String(index + 1).padStart(2, "0")}</span>
+                <div className="category-card-body">
+                  <h3 className="serif" style={{ fontSize: "1.2rem", fontWeight: 400, margin: "0 0 0.4rem", color: "var(--cream)" }}>{name}</h3>
+                  <p className="muted" style={{ fontSize: 13, lineHeight: 1.65, margin: 0 }}>{description}</p>
+                </div>
               </Link>
             ))}
           </div>
@@ -112,12 +114,23 @@ export default async function HomePage() {
 
         <section className="container section-shell">
           <SectionHead eyebrow="Meaning behind the work" title="Stories & Inspiration" />
-          <div className="responsive-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18 }}>
+          <div className="responsive-grid swipe-mobile" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18 }}>
             {(storyWorks.length ? storyWorks : featured.slice(0, 3)).map((art) => (
-              <Link key={art.id} href={`/artwork/${art.slug || art.id}`} className="panel card-hover" style={{ padding: "1.2rem" }}>
-                <p className="eyebrow">{art.cultural_roots ?? "Cultural Story"}</p>
-                <h3 className="serif" style={{ fontWeight: 400, fontSize: "1.35rem" }}>{art.title}</h3>
-                <p className="muted" style={{ lineHeight: 1.75 }}>{art.piece_story || art.cultural_significance || art.yoruba_connection || "A work shaped by memory, material, and cultural imagination."}</p>
+              <Link key={art.id} href={`/artwork/${art.slug || art.id}`} className="story-card card-hover">
+                {/* Image backdrop */}
+                <div className="story-card-img">
+                  <img src={art.image_url} alt="" aria-hidden="true" />
+                  <div className="story-card-gradient" />
+                </div>
+                {/* Text overlay */}
+                <div className="story-card-body">
+                  <p className="eyebrow" style={{ color: "var(--gold)", marginBottom: "0.5rem" }}>{art.cultural_roots ?? "Cultural Story"}</p>
+                  <h3 className="serif" style={{ fontWeight: 400, fontSize: "1.4rem", color: "var(--cream)", margin: "0 0 0.7rem", lineHeight: 1.2 }}>{art.title}</h3>
+                  <p style={{ fontSize: 13, lineHeight: 1.7, color: "rgba(255,245,225,0.72)", margin: 0, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                    {art.piece_story || art.cultural_significance || art.yoruba_connection || "A work shaped by memory, material, and cultural imagination."}
+                  </p>
+                  <span className="story-card-cta">Read the story →</span>
+                </div>
               </Link>
             ))}
           </div>
@@ -139,11 +152,15 @@ export default async function HomePage() {
 
         <section className="container section-shell">
           <SectionHead eyebrow="Collector words" title="Testimonials" />
-          <div className="responsive-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18 }}>
+          <div className="responsive-grid swipe-mobile" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18 }}>
             {testimonials.map(([name, role, quote]) => (
-              <figure className="panel wood-frame" key={name} style={{ margin: 0, padding: "1.3rem" }}>
-                <blockquote className="serif" style={{ color: "var(--cream)", fontSize: "1.2rem", lineHeight: 1.55, margin: 0 }}>“{quote}”</blockquote>
-                <figcaption className="muted" style={{ marginTop: "1rem", fontSize: 13 }}>{name} · {role}</figcaption>
+              <figure className="testimonial-card" key={name}>
+                <span className="testimonial-quote-mark" aria-hidden="true">“</span>
+                <blockquote className="serif" style={{ color: "var(--cream)", fontSize: "1.15rem", lineHeight: 1.6, margin: 0, position: "relative", zIndex: 1 }}>{quote}</blockquote>
+                <figcaption style={{ marginTop: "1.4rem", position: "relative", zIndex: 1 }}>
+                  <span style={{ display: "block", color: "var(--cream)", fontSize: 13, fontWeight: 600 }}>{name}</span>
+                  <span style={{ color: "var(--gold)", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase" }}>{role}</span>
+                </figcaption>
               </figure>
             ))}
           </div>

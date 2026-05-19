@@ -91,13 +91,13 @@ export default function AdminArtworksPage() {
         ) : (
           <div style={{ display: "grid", gap: 12 }}>
             {artworks.map((art) => (
-              <div key={art.id} className="panel" style={{ display: "grid", gridTemplateColumns: "72px 1fr auto", gap: 16, alignItems: "center", padding: "1rem 1.2rem", opacity: actionId === art.id ? 0.5 : 1, transition: "opacity 0.2s" }}>
+              <div key={art.id} className="artwork-row" style={{ opacity: actionId === art.id ? 0.5 : 1, transition: "opacity 0.2s" }}>
                 {/* Thumbnail */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={art.image_url} alt={art.title} style={{ width: 72, height: 72, objectFit: "cover", borderRadius: 6, border: "1px solid var(--border)" }} />
+                <img src={art.image_url} alt={art.title} className="artwork-row-thumb" />
 
                 {/* Details */}
-                <div style={{ minWidth: 0 }}>
+                <div className="artwork-row-details">
                   <p style={{ margin: 0, fontWeight: 600, color: "var(--cream)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{art.title}</p>
                   <p className="muted" style={{ margin: "2px 0 6px", fontSize: 13 }}>{art.artist_name} · {art.medium}</p>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -108,7 +108,7 @@ export default function AdminArtworksPage() {
                 </div>
 
                 {/* Actions */}
-                <div style={{ display: "flex", gap: 6, flexShrink: 0, flexWrap: "wrap", justifyContent: "end" }}>
+                <div className="artwork-row-actions">
                   <ActionBtn
                     onClick={() => markSold(art.id)}
                     disabled={art.availability === "Sold" || actionId === art.id}

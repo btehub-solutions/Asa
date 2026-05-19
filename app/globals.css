@@ -392,9 +392,26 @@ select {
     letter-spacing: 0.16em;
   }
 
-  .grid-cards {
-    gap: 1rem;
-    grid-template-columns: 1fr;
+  .grid-cards,
+  .swipe-mobile {
+    display: flex !important;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 1.2rem !important;
+    padding-bottom: 1.5rem;
+    margin-right: -10px;
+    padding-right: 20px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .grid-cards::-webkit-scrollbar,
+  .swipe-mobile::-webkit-scrollbar {
+    display: none;
+  }
+  .grid-cards > *,
+  .swipe-mobile > * {
+    flex: 0 0 82% !important;
+    scroll-snap-align: center;
   }
 
   .panel {
@@ -510,3 +527,548 @@ select {
     min-height: 180px !important;
   }
 }
+
+/* Artwork Detail Layout */
+.artwork-main-container { padding: 3rem 0 5rem; }
+.artwork-layout { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 3rem; align-items: start; }
+.artwork-image-wrapper { min-height: 420px; position: relative; overflow: hidden; }
+.artwork-image { width: 100%; height: auto; max-height: 72vh; object-fit: contain; position: relative; z-index: 1; display: block; }
+.artwork-thumbnail-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 10px; margin-top: 10px; }
+.artwork-title { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 400; line-height: 1.08; margin: 0.7rem 0 0.25rem; }
+.artwork-artist { margin: 0 0 1.4rem; font-size: 1.05rem; }
+.artwork-quote { border-left: 3px solid var(--gold); color: var(--gold-light); font-style: italic; margin: 0 0 1.4rem; padding-left: 1rem; }
+.artwork-details-list { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 1rem 0; margin-bottom: 1.2rem; display: grid; gap: 12px; }
+.artwork-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1.2rem; }
+.artwork-about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; margin-top: 3rem; }
+.artist-profile-img { background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; height: 280px; overflow: hidden; position: relative; }
+
+.artwork-thumbnail { aspect-ratio: 1; object-fit: cover; border: 1px solid var(--border); border-radius: 5px; width: 100%; height: auto; }
+
+@media (max-width: 820px) {
+  .artwork-main-container { padding: 1.5rem 0 3rem; }
+  .artwork-layout { grid-template-columns: 1fr; gap: 1.8rem; }
+  .artwork-about-grid { grid-template-columns: 1fr; gap: 1.5rem; margin-top: 2rem; }
+  .artwork-image-wrapper { min-height: 0; }
+  .artwork-image { max-height: 55vh; }
+  .artwork-thumbnail-gallery { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; padding-bottom: 8px; margin-right: -12px; padding-right: 12px; scrollbar-width: none; }
+  .artwork-thumbnail-gallery::-webkit-scrollbar { display: none; }
+  .artwork-thumbnail { flex: 0 0 140px; scroll-snap-align: start; }
+  .artist-profile-img { height: 240px; }
+  .mobile-no-panel { border: none !important; background: transparent !important; padding: 0 !important; }
+
+}
+
+/* ══════════════════════════════════════════
+   CATEGORY CARD — numbered editorial style
+   ══════════════════════════════════════════ */
+.category-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.4rem 1.2rem;
+  min-height: 148px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gold);
+  border-radius: 8px;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 220ms ease, background 220ms ease;
+}
+.category-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 18px,
+    rgba(212, 175, 55, 0.03) 18px,
+    rgba(212, 175, 55, 0.03) 19px
+  );
+  pointer-events: none;
+}
+.category-card:hover {
+  border-left-color: var(--gold-light);
+  background: var(--panel-2);
+}
+.category-card-num {
+  font-size: 2.2rem;
+  font-weight: 400;
+  color: var(--gold);
+  opacity: 0.35;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+  letter-spacing: -0.03em;
+  transition: opacity 220ms ease;
+}
+.category-card:hover .category-card-num { opacity: 0.65; }
+.category-card-body { position: relative; z-index: 1; }
+
+/* ══════════════════════════════════════════
+   STORY CARD — image-backed editorial card
+   ══════════════════════════════════════════ */
+.story-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 340px;
+  border-radius: 10px;
+  overflow: hidden;
+  text-decoration: none;
+  border: 1px solid var(--border);
+}
+.story-card-img {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.story-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  transition: transform 500ms ease;
+}
+.story-card:hover .story-card-img img { transform: scale(1.05); }
+.story-card-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(28, 15, 5, 0.18) 0%,
+    rgba(28, 15, 5, 0.55) 45%,
+    rgba(28, 15, 5, 0.97) 100%
+  );
+}
+.story-card-body {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+  padding: 1.4rem;
+}
+.story-card-cta {
+  display: inline-block;
+  margin-top: 1rem;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.4);
+  padding-bottom: 2px;
+  transition: border-color 180ms ease;
+}
+.story-card:hover .story-card-cta { border-color: var(--gold); }
+
+/* ══════════════════════════════════════════
+   TESTIMONIAL CARD — oversized quote mark
+   ══════════════════════════════════════════ */
+.testimonial-card {
+  position: relative;
+  margin: 0;
+  padding: 2rem 1.6rem 1.6rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.testimonial-card::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+  opacity: 0.5;
+}
+.testimonial-quote-mark {
+  position: absolute;
+  top: -0.3rem;
+  left: 0.8rem;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 7rem;
+  line-height: 1;
+  color: var(--gold);
+  opacity: 0.12;
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (max-width: 820px) {
+  .story-card { min-height: 300px; }
+}
+
+/* ── Mobile full-screen overlay menu ── */
+.mobile-overlay-menu {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--bg);
+  transform: translateX(100%);
+  transition: transform 340ms cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+}
+.mobile-overlay-menu.open {
+  transform: translateX(0);
+}
+
+.mobile-overlay-inner {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding: 0 1.4rem 2rem;
+}
+
+.mobile-overlay-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2.5rem;
+}
+
+.mobile-overlay-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1;
+}
+
+.mobile-overlay-link {
+  display: block;
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: clamp(1.6rem, 7vw, 2.2rem);
+  font-weight: 400;
+  color: var(--cream);
+  text-decoration: none;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--border);
+  letter-spacing: -0.01em;
+  transition: color 180ms ease, padding-left 180ms ease;
+  opacity: 0;
+  animation: overlayLinkIn 320ms ease forwards;
+}
+.mobile-overlay-link:hover {
+  color: var(--gold);
+  padding-left: 0.5rem;
+}
+
+.mobile-overlay-footer {
+  padding-top: 2.5rem;
+}
+
+@keyframes overlayLinkIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 820px) {
+  .mobile-overlay-menu { display: block; }
+}
+
+.card-hover-minimal { transition: opacity 200ms ease; }
+.card-hover-minimal:hover { opacity: 0.85; }
+
+/* ══════════════════════════════════════════
+   ADMIN DASHBOARD CARD — editorial nav tile
+   ══════════════════════════════════════════ */
+.admin-nav-card {
+  position: relative;
+  display: block;
+  padding: 1.5rem 1.4rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gold);
+  border-radius: 8px;
+  overflow: hidden;
+  text-decoration: none;
+  transition: border-left-color 220ms ease, background 220ms ease, box-shadow 220ms ease;
+}
+/* Adire diagonal hatching texture */
+.admin-nav-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 18px,
+    rgba(212, 175, 55, 0.03) 18px,
+    rgba(212, 175, 55, 0.03) 19px
+  );
+  pointer-events: none;
+}
+/* Gold bottom shimmer strip */
+.admin-nav-card::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold), transparent 60%);
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+.admin-nav-card:hover {
+  border-left-color: var(--gold-light);
+  background: var(--panel-2);
+  box-shadow: 0 16px 40px rgba(193, 123, 47, 0.14);
+}
+.admin-nav-card:hover::after { opacity: 0.7; }
+
+.admin-nav-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: rgba(193, 123, 47, 0.12);
+  border: 1px solid rgba(193, 123, 47, 0.25);
+  color: var(--gold);
+  margin-bottom: 0.9rem;
+  transition: background 220ms ease, color 220ms ease;
+  position: relative;
+  z-index: 1;
+}
+.admin-nav-card:hover .admin-nav-card-icon {
+  background: rgba(193, 123, 47, 0.22);
+  color: var(--gold-light);
+}
+.admin-nav-card-title {
+  font-size: 1.25rem;
+  font-weight: 400;
+  margin: 0 0 0.4rem;
+  color: var(--cream);
+  position: relative;
+  z-index: 1;
+}
+.admin-nav-card-text {
+  font-size: 0.85rem;
+  line-height: 1.7;
+  color: var(--muted);
+  margin: 0;
+  position: relative;
+  z-index: 1;
+}
+.admin-nav-card-arrow {
+  display: inline-block;
+  margin-top: 1rem;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.35);
+  padding-bottom: 2px;
+  position: relative;
+  z-index: 1;
+  transition: border-color 180ms ease, color 180ms ease;
+}
+.admin-nav-card:hover .admin-nav-card-arrow {
+  border-color: var(--gold-light);
+  color: var(--gold-light);
+}
+
+/* ══════════════════════════════════════════
+   ADMIN ARTWORK ROW — inventory item card
+   ══════════════════════════════════════════ */
+.artwork-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 1rem 1.2rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 3px solid rgba(193, 123, 47, 0.45);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-left-color 220ms ease, box-shadow 220ms ease, background 220ms ease;
+}
+/* Adire texture overlay */
+.artwork-row::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 22px,
+    rgba(212, 175, 55, 0.025) 22px,
+    rgba(212, 175, 55, 0.025) 23px
+  );
+  pointer-events: none;
+}
+.artwork-row:hover {
+  border-left-color: var(--gold);
+  background: var(--panel-2);
+  box-shadow: 0 8px 28px rgba(193, 123, 47, 0.12);
+}
+
+.artwork-row-thumb {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  display: block;
+  transition: border-color 220ms ease, box-shadow 220ms ease;
+  position: relative;
+  z-index: 1;
+}
+.artwork-row:hover .artwork-row-thumb {
+  border-color: rgba(193, 123, 47, 0.55);
+  box-shadow: 0 4px 14px rgba(193, 123, 47, 0.2);
+}
+.artwork-row-details {
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+}
+.artwork-row-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: end;
+  position: relative;
+  z-index: 1;
+}
+
+/* ══════════════════════════════════════════
+   ARTIST APPLICATION CARD — filed-seal style
+   ══════════════════════════════════════════ */
+.application-card {
+  position: relative;
+  padding: 1.6rem 1.5rem 1.5rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: box-shadow 220ms ease, border-color 220ms ease;
+}
+/* Kente-inspired stripe across the top */
+.application-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--gold) 0,
+    var(--gold) 14px,
+    var(--red) 14px,
+    var(--red) 22px,
+    var(--green) 22px,
+    var(--green) 30px,
+    var(--gold-light) 30px,
+    var(--gold-light) 44px
+  );
+  opacity: 0.7;
+}
+/* Decorative monogram watermark */
+.application-card::after {
+  content: "\00C0";
+  position: absolute;
+  bottom: -0.8rem;
+  right: 0.8rem;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 7rem;
+  line-height: 1;
+  color: var(--gold);
+  opacity: 0.05;
+  pointer-events: none;
+  user-select: none;
+}
+.application-card:hover {
+  border-color: rgba(193, 123, 47, 0.45);
+  box-shadow: 0 16px 40px rgba(193, 123, 47, 0.12);
+}
+
+.application-card-message {
+  position: relative;
+  background: rgba(28, 15, 5, 0.5);
+  padding: 1.2rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+/* Quote mark watermark inside message box */
+.application-card-message::before {
+  content: '\201C';
+  position: absolute;
+  top: -0.5rem;
+  left: 0.5rem;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 5rem;
+  line-height: 1;
+  color: var(--gold);
+  opacity: 0.1;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ══════════════════════════════════════════
+   PUBLIC ARTWORK CARD — gallery tile
+   ══════════════════════════════════════════ */
+.gallery-card {
+  display: block;
+  text-decoration: none;
+  position: relative;
+}
+.gallery-card-frame {
+  aspect-ratio: 4 / 5;
+  position: relative;
+  margin-bottom: 0.8rem;
+  overflow: hidden;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+}
+/* Image zooms on hover — Ken Burns */
+.gallery-card-frame img {
+  transition: transform 520ms ease !important;
+}
+.gallery-card:hover .gallery-card-frame img {
+  transform: scale(1.05) !important;
+}
+/* Museum label gradient */
+.gallery-card-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 55%, rgba(28, 15, 5, 0.72) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+.gallery-card-label {
+  padding: 0.7rem 0.6rem;
+}
+.gallery-card-cta {
+  display: inline-block;
+  margin-top: 0.4rem;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+  padding-bottom: 1px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 200ms ease, transform 200ms ease, border-color 200ms ease;
+}
+.gallery-card:hover .gallery-card-cta {
+  opacity: 1;
+  transform: translateY(0);
+  border-color: var(--gold);
+}
+

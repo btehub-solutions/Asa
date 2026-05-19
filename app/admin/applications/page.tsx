@@ -43,8 +43,8 @@ export default async function ApplicationsPage() {
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
             {applications.map((app) => (
-              <div key={app.id} className="panel wood-frame" style={{ padding: "1.5rem" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
+              <div key={app.id} className="application-card">
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, paddingTop: "0.4rem" }}>
                   <div>
                     <h2 className="serif" style={{ fontSize: "1.6rem", fontWeight: 400, margin: 0, color: "var(--cream)" }}>{app.name}</h2>
                     <p className="muted" style={{ margin: "0.2rem 0 1.2rem", fontSize: 13 }}>
@@ -99,9 +99,9 @@ export default async function ApplicationsPage() {
                   )}
                 </div>
 
-                <div style={{ background: "rgba(28, 15, 5, 0.4)", padding: "1.2rem", borderRadius: 6, border: "1px solid var(--border)" }}>
-                  <strong style={{ display: "block", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--gold)", marginBottom: "0.6rem" }}>Message</strong>
-                  <p style={{ margin: 0, fontSize: 14, lineHeight: 1.7, whiteSpace: "pre-wrap", color: "var(--muted)" }}>{app.message}</p>
+                <div className="application-card-message">
+                  <strong style={{ display: "block", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--gold)", marginBottom: "0.6rem", position: "relative", zIndex: 1 }}>Message</strong>
+                  <p style={{ margin: 0, fontSize: 14, lineHeight: 1.7, whiteSpace: "pre-wrap", color: "var(--muted)", position: "relative", zIndex: 1 }}>{app.message}</p>
                 </div>
               </div>
             ))}

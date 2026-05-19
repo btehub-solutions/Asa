@@ -26,10 +26,11 @@ export default function AdminDashboardPage() {
 
 function AdminCard({ href, icon, title, text }: { href: string; icon: ReactNode; title: string; text: string }) {
   return (
-    <Link className="panel card-hover wood-frame" href={href} style={{ display: "block", padding: "1.25rem" }}>
-      <span style={{ color: "var(--gold)" }}>{icon}</span>
-      <h2 className="serif" style={{ fontSize: "1.35rem", fontWeight: 400 }}>{title}</h2>
-      <p className="muted" style={{ lineHeight: 1.7 }}>{text}</p>
+    <Link className="admin-nav-card" href={href}>
+      <span className="admin-nav-card-icon">{icon}</span>
+      <h2 className="serif admin-nav-card-title">{title}</h2>
+      <p className="admin-nav-card-text">{text}</p>
+      <span className="admin-nav-card-arrow">Open →</span>
     </Link>
   );
 }

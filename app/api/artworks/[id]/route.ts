@@ -1,40 +1,17 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase";
 import { AVAILABILITY, PUBLICATION_STATUS } from "@/lib/categories";
-
-async function verifyAdmin() {
-  const cookieToken = (await cookies()).get("asa_admin")?.value;
-  return Boolean(process.env.ADMIN_UPLOAD_TOKEN && cookieToken === process.env.ADMIN_UPLOAD_TOKEN);
-}
-
-const optionalNullableString = z.preprocess((value) => {
-  if (value === "") return null;
-  return value;
-}, z.string().nullable().optional());
-
-const optionalNullableNumber = z.preprocess((value) => {
-  if (value === "" || value == null) return null;
-  return value;
-}, z.coerce.number().nullable().optional());
-
-const stringArrayFromForm = z.preprocess((value) => {
-  if (Array.isArray(value)) return value;
-  if (typeof value !== "string") return value;
-
-  const trimmed = value.trim();
-  if (!trimmed) return [];
-
-  try {
-    const parsed = JSON.parse(trimmed);
-    if (Array.isArray(parsed)) return parsed;
-  } catch {
-    // Fall through to comma-separated parsing for tags and legacy form values.
-  }
-
-  return trimmed.split(",").map((item) => item.trim()).filter(Boolean);
-}, z.array(z.string()));
+import { invalidOrigin, isAdminRequest, isSameOriginRequest, unauthorized } from "@/lib/admin-auth";
+import {
+  categoryArraySchema,
+  optionalNullableNumber,
+  optionalNullableString,
+  stringArrayFromForm,
+  tagArraySchema,
+  validateImageFile
+} from "@/lib/artwork-validation";
+import { removeArtworkImages, storagePathFromPublicUrl, uploadArtworkImage } from "@/lib/storage";
 
 const patchSchema = z.object({
   availability: z.enum(AVAILABILITY).optional(),
@@ -53,20 +30,24 @@ const patchSchema = z.object({
   piece_story: optionalNullableString,
   yoruba_connection: optionalNullableString,
   admin_notes: optionalNullableString,
-  commission_rate: optionalNullableNumber,
+  commission_rate: optionalNullableNumber.refine((value) => value == null || value <= 100, "Commission cannot exceed 100."),
   nationality: optionalNullableString,
   city_base: optionalNullableString,
   year_active: optionalNullableString,
-  categories: stringArrayFromForm.optional(),
-  tags: stringArrayFromForm.optional(),
+  categories: stringArrayFromForm.pipe(categoryArraySchema).optional(),
+  tags: stringArrayFromForm.pipe(tagArraySchema).optional(),
 });
 
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!(await verifyAdmin())) {
-    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  if (!isSameOriginRequest(request)) {
+    return invalidOrigin();
+  }
+
+  if (!(await isAdminRequest())) {
+    return unauthorized();
   }
 
   const { id } = await params;
@@ -81,18 +62,34 @@ export async function PATCH(
 
   const supabase = supabaseAdmin();
   const updateData: Record<string, unknown> = { ...parsed.data, updated_at: new Date().toISOString() };
+  const bucket = process.env.SUPABASE_STORAGE_BUCKET ?? "artworks";
+  let newImagePath: string | null = null;
+  let oldImagePath: string | null = null;
 
   if (form) {
     const image = form.get("image");
 
     if (image instanceof File && image.size > 0) {
-      if (!image.type.startsWith("image/")) {
-        return NextResponse.json({ error: "A valid artwork image is required." }, { status: 400 });
+      const imageError = validateImageFile(image, "Artwork image");
+      if (imageError) {
+        return NextResponse.json({ error: imageError }, { status: 400 });
       }
 
-      const bucket = process.env.SUPABASE_STORAGE_BUCKET ?? "artworks";
       try {
-        updateData.image_url = await uploadImage(supabase, bucket, image);
+        const queryClient = supabase as ReturnType<typeof supabaseAdmin> & {
+          from(table: "artworks"): {
+            select(columns: string): {
+              eq(column: string, value: string): {
+                single(): Promise<{ data: { image_url: string } | null; error: unknown }>;
+              };
+            };
+          };
+        };
+        const { data: current } = await queryClient.from("artworks").select("image_url").eq("id", id).single();
+        oldImagePath = current?.image_url ? storagePathFromPublicUrl(current.image_url, bucket) : null;
+        const upload = await uploadArtworkImage(supabase, bucket, image);
+        newImagePath = upload.path;
+        updateData.image_url = upload.url;
       } catch (error) {
         console.error(error);
         return NextResponse.json({ error: "Could not upload artwork image." }, { status: 500 });
@@ -118,31 +115,31 @@ export async function PATCH(
     .single();
 
   if (error) {
+    if (newImagePath) {
+      await removeArtworkImages(supabase, bucket, [newImagePath]);
+    }
     console.error(error);
     return NextResponse.json({ error: "Could not update artwork." }, { status: 500 });
+  }
+
+  if (newImagePath && oldImagePath && oldImagePath !== newImagePath) {
+    const cleanupError = await removeArtworkImages(supabase, bucket, [oldImagePath]);
+    if (cleanupError) console.error(cleanupError);
   }
 
   return NextResponse.json({ artwork: data });
 }
 
-async function uploadImage(supabase: ReturnType<typeof supabaseAdmin>, bucket: string, image: File) {
-  const ext = image.name.split(".").pop() || "webp";
-  const path = `${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage
-    .from(bucket)
-    .upload(path, image, { contentType: image.type, upsert: false });
-
-  if (error) throw error;
-  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-  return data.publicUrl;
-}
-
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!(await verifyAdmin())) {
-    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  if (!isSameOriginRequest(request)) {
+    return invalidOrigin();
+  }
+
+  if (!(await isAdminRequest())) {
+    return unauthorized();
   }
 
   const { id } = await params;
@@ -168,14 +165,6 @@ export async function DELETE(
     .eq("id", id)
     .single();
 
-  const { error } = await queryClient.from("artworks").delete().eq("id", id);
-
-  if (error) {
-    console.error(error);
-    return NextResponse.json({ error: "Could not delete artwork." }, { status: 500 });
-  }
-
-  // Clean up storage images in the background
   if (artwork) {
     const bucket = process.env.SUPABASE_STORAGE_BUCKET ?? "artworks";
     const allUrls = [
@@ -184,10 +173,19 @@ export async function DELETE(
       ...(artwork.extra_image_urls ?? []),
     ].filter(Boolean) as string[];
 
-    const paths = allUrls.map((url) => url.split(`/${bucket}/`)[1]).filter(Boolean);
-    if (paths.length > 0) {
-      await supabase.storage.from(bucket).remove(paths);
+    const paths = allUrls.map((url) => storagePathFromPublicUrl(url, bucket)).filter(Boolean) as string[];
+    const storageError = await removeArtworkImages(supabase, bucket, paths);
+    if (storageError) {
+      console.error(storageError);
+      return NextResponse.json({ error: "Could not remove artwork images." }, { status: 500 });
     }
+  }
+
+  const { error } = await queryClient.from("artworks").delete().eq("id", id);
+
+  if (error) {
+    console.error(error);
+    return NextResponse.json({ error: "Could not delete artwork." }, { status: 500 });
   }
 
   return NextResponse.json({ success: true });

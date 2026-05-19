@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { supabaseAdmin } from "@/lib/supabase";
+import { isAdminRequest, unauthorized } from "@/lib/admin-auth";
 
 export async function GET() {
-  const cookieToken = (await cookies()).get("asa_admin")?.value;
-  if (!process.env.ADMIN_UPLOAD_TOKEN || cookieToken !== process.env.ADMIN_UPLOAD_TOKEN) {
-    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  if (!(await isAdminRequest())) {
+    return unauthorized();
   }
 
   const supabase = supabaseAdmin();

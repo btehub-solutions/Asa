@@ -1,20 +1,20 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { formatPrice } from "@/lib/format";
-import { cookies } from "next/headers";
 import { getArtwork, getArtworkAdmin } from "@/lib/artworks";
 
 export const dynamic = "force-dynamic";
 
 export default async function ArtworkDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  
+
   const cookieToken = (await cookies()).get("asa_admin")?.value;
   const isAdmin = Boolean(process.env.ADMIN_UPLOAD_TOKEN && cookieToken === process.env.ADMIN_UPLOAD_TOKEN);
-  
+
   const art = isAdmin ? await getArtworkAdmin(id) : await getArtwork(id);
   if (!art) notFound();
 
@@ -22,16 +22,16 @@ export default async function ArtworkDetailPage({ params }: { params: Promise<{ 
     <>
       <SiteHeader />
       <main className="container artwork-main-container">
-        <Link href="/" className="eyebrow" style={{ display: "inline-block", marginBottom: "1.5rem", color: "var(--muted)" }}>Back to gallery</Link>
+        <Link href="/gallery" className="eyebrow" style={{ display: "inline-block", marginBottom: "1.5rem", color: "var(--muted)" }}>Back to gallery</Link>
         <div className="artwork-layout">
           <div>
             <div className="panel adire artwork-image-wrapper">
               <Image src={art.image_url} alt={art.title} width={1100} height={1300} priority className="artwork-image" />
             </div>
             {art.extra_image_urls.length ? (
-              <div className="artwork-thumbnail-gallery">
-                {art.extra_image_urls.map((image) => (
-                  <Image key={image} src={image} alt="" width={180} height={180} className="artwork-thumbnail" />
+              <div className="artwork-thumbnail-gallery" aria-label="Additional artwork images">
+                {art.extra_image_urls.map((image, index) => (
+                  <Image key={image} src={image} alt={`${art.title} detail ${index + 1}`} width={180} height={180} className="artwork-thumbnail" />
                 ))}
               </div>
             ) : null}

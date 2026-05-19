@@ -2,7 +2,7 @@
 
 import { ImagePlus, Save, Upload } from "lucide-react";
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { AVAILABILITY, CATEGORIES } from "@/lib/categories";
@@ -16,12 +16,23 @@ export default function AdminUploadPage() {
   const [message, setMessage] = useState("");
   const [previews, setPreviews] = useState<PreviewMap>({});
 
+  useEffect(() => {
+    return () => {
+      Object.values(previews).forEach((url) => {
+        if (url) URL.revokeObjectURL(url);
+      });
+    };
+  }, [previews]);
+
   function toggleCategory(category: string) {
     setCategories((items) => items.includes(category) ? items.filter((item) => item !== category) : [...items, category]);
   }
 
   function updatePreview(name: string, file?: File) {
-    setPreviews((items) => ({ ...items, [name]: file ? URL.createObjectURL(file) : null }));
+    setPreviews((items) => {
+      if (items[name]) URL.revokeObjectURL(items[name]);
+      return { ...items, [name]: file ? URL.createObjectURL(file) : null };
+    });
   }
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
@@ -41,21 +52,33 @@ export default function AdminUploadPage() {
     setMessage("");
     formData.set("categories", JSON.stringify(finalCategories));
 
-    const res = await fetch("/api/artworks", { method: "POST", body: formData });
-    const data = await res.json().catch(() => ({}));
+    try {
+      const res = await fetch("/api/artworks", { method: "POST", body: formData });
+      const data = await res.json().catch(() => ({}));
 
-    if (!res.ok) {
-      setMessage(data.error ?? "Upload failed.");
+      if (!res.ok) {
+        setMessage(data.error ?? "Upload failed.");
+        setStatus("error");
+        return;
+      }
+
+      setStatus("success");
+      setMessage("Artwork saved.");
+      event.currentTarget.reset();
+      setCategories([]);
+      setOthers("");
+      setPreviews((items) => {
+        Object.values(items).forEach((url) => {
+          if (url) URL.revokeObjectURL(url);
+        });
+        return {};
+      });
+    } catch {
+      setMessage("Upload failed. Please check your connection and try again.");
       setStatus("error");
-      return;
+    } finally {
+      if (status === "loading") setStatus("idle");
     }
-
-    setStatus("success");
-    setMessage("Artwork saved.");
-    event.currentTarget.reset();
-    setCategories([]);
-    setOthers("");
-    setPreviews({});
   }
 
   return (
@@ -107,7 +130,7 @@ export default function AdminUploadPage() {
                 {CATEGORIES.map((category) => {
                   const active = categories.includes(category);
                   return (
-                    <button key={category} type="button" onClick={() => toggleCategory(category)} style={{ background: active ? "var(--gold)" : "var(--panel-2)", border: `1px solid ${active ? "var(--gold)" : "var(--border)"}`, borderRadius: 999, color: active ? "var(--bg)" : "var(--muted)", cursor: "pointer", padding: "0.45rem 0.75rem" }}>
+                    <button key={category} type="button" aria-pressed={active} onClick={() => toggleCategory(category)} style={{ background: active ? "var(--gold)" : "var(--panel-2)", border: `1px solid ${active ? "var(--gold)" : "var(--border)"}`, borderRadius: 999, color: active ? "var(--bg)" : "var(--muted)", cursor: "pointer", padding: "0.45rem 0.75rem" }}>
                       {category}
                     </button>
                   );
@@ -120,7 +143,7 @@ export default function AdminUploadPage() {
               <textarea className="input" id="piece_story" name="piece_story" rows={4} placeholder="A short note about the work, inspiration, or meaning." />
             </Field>
 
-            {message ? <p style={{ color: status === "error" ? "#ffb4a8" : "var(--gold-light)", margin: 0 }}>{message}</p> : null}
+            {message ? <p aria-live="polite" style={{ color: status === "error" ? "#ffb4a8" : "var(--gold-light)", margin: 0 }}>{message}</p> : null}
 
             <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "end" }}>
               <button className="btn btn-ghost" name="intent_status" value="Draft" disabled={status === "loading"}><Save size={16} /> Save Draft</button>

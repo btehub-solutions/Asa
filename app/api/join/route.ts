@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { invalidOrigin, isSameOriginRequest } from "@/lib/admin-auth";
 import { hasSupabaseConfig, supabaseAdmin } from "@/lib/supabase";
 
 const joinSchema = z.object({
@@ -15,6 +16,10 @@ const joinSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) {
+    return invalidOrigin();
+  }
+
   const form = await request.formData();
   const parsed = joinSchema.safeParse(Object.fromEntries(form));
   if (!parsed.success) {

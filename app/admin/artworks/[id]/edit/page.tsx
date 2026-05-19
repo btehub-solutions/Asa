@@ -22,6 +22,14 @@ export default function EditArtworkPage({ params }: { params: Promise<{ id: stri
   const [id, setId] = useState<string>("");
 
   useEffect(() => {
+    return () => {
+      Object.values(previews).forEach((url) => {
+        if (url) URL.revokeObjectURL(url);
+      });
+    };
+  }, [previews]);
+
+  useEffect(() => {
     params.then(({ id: resolvedId }) => {
       setId(resolvedId);
       fetch(`/api/admin/artworks/${resolvedId}`)
@@ -32,6 +40,11 @@ export default function EditArtworkPage({ params }: { params: Promise<{ id: stri
             setCategories(data.artwork.categories ?? []);
           }
           setLoading(false);
+        })
+        .catch(() => {
+          setMessage("Could not load artwork.");
+          setStatus("error");
+          setLoading(false);
         });
     });
   }, [params]);
@@ -41,7 +54,10 @@ export default function EditArtworkPage({ params }: { params: Promise<{ id: stri
   }
 
   function updatePreview(name: string, file?: File) {
-    setPreviews((items) => ({ ...items, [name]: file ? URL.createObjectURL(file) : null }));
+    setPreviews((items) => {
+      if (items[name]) URL.revokeObjectURL(items[name]);
+      return { ...items, [name]: file ? URL.createObjectURL(file) : null };
+    });
   }
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
@@ -61,22 +77,33 @@ export default function EditArtworkPage({ params }: { params: Promise<{ id: stri
     setMessage("");
     formData.set("categories", JSON.stringify(finalCategories));
 
-    const res = await fetch(`/api/artworks/${id}`, {
-      method: "PATCH",
-      body: formData,
-    });
+    try {
+      const res = await fetch(`/api/artworks/${id}`, {
+        method: "PATCH",
+        body: formData,
+      });
 
-    const data = await res.json().catch(() => ({}));
+      const data = await res.json().catch(() => ({}));
 
-    if (!res.ok) {
-      setMessage(data.error ?? "Update failed.");
+      if (!res.ok) {
+        setMessage(data.error ?? "Update failed.");
+        setStatus("error");
+        return;
+      }
+
+      setStatus("success");
+      setMessage("Artwork updated successfully.");
+      setArtwork(data.artwork);
+      setPreviews((items) => {
+        Object.values(items).forEach((url) => {
+          if (url) URL.revokeObjectURL(url);
+        });
+        return {};
+      });
+    } catch {
+      setMessage("Update failed. Please check your connection and try again.");
       setStatus("error");
-      return;
     }
-
-    setStatus("success");
-    setMessage("Artwork updated successfully.");
-    setArtwork(data.artwork);
   }
 
   if (loading) {
@@ -188,7 +215,7 @@ export default function EditArtworkPage({ params }: { params: Promise<{ id: stri
                     {CATEGORIES.map((category) => {
                       const active = categories.includes(category);
                       return (
-                        <button key={category} type="button" onClick={() => toggleCategory(category)}
+                        <button key={category} type="button" aria-pressed={active} onClick={() => toggleCategory(category)}
                           style={{ background: active ? "var(--gold)" : "var(--panel-2)", border: `1px solid ${active ? "var(--gold)" : "var(--border)"}`, borderRadius: 999, color: active ? "var(--bg)" : "var(--muted)", cursor: "pointer", padding: "0.45rem 0.75rem" }}>
                           {category}
                         </button>
@@ -228,7 +255,7 @@ export default function EditArtworkPage({ params }: { params: Promise<{ id: stri
                 </Field>
               </FormSection>
 
-              {message ? <p style={{ color: status === "error" ? "#ffb4a8" : "var(--gold-light)" }}>{message}</p> : null}
+              {message ? <p aria-live="polite" style={{ color: status === "error" ? "#ffb4a8" : "var(--gold-light)" }}>{message}</p> : null}
 
               <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "end" }}>
                 <button className="btn btn-ghost" name="intent_status" value="Draft" disabled={status === "loading"}>

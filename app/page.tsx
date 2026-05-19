@@ -26,7 +26,7 @@ const testimonials = [
 export default async function HomePage() {
   const artworks = await listPublishedArtworks();
   const featured = artworks.slice(0, 6);
-  const trending = [...artworks].sort((a, b) => (b.price ?? 0) - (a.price ?? 0)).slice(0, 3);
+  const collectorSelection = [...artworks].sort((a, b) => (b.price ?? 0) - (a.price ?? 0)).slice(0, 3);
   const artists = uniqueArtists(artworks).slice(0, 3);
   const bronzeWorks = artworks.filter((art) =>
     art.categories.some((category) => category.toLowerCase().includes("bronze") || category.toLowerCase().includes("sculpt"))
@@ -67,7 +67,7 @@ export default async function HomePage() {
 
       <main>
         <section id="featured-works" className="container section-shell">
-          <SectionHead eyebrow="Current Exhibition" title="Featured Works" aside={`${featured.length} work${featured.length === 1 ? "" : "s"} on view`} />
+          <SectionHead eyebrow="Current exhibition" title="Featured Works" aside={`${featured.length} work${featured.length === 1 ? "" : "s"} on view`} />
           {featured.length ? <div className="grid-cards">{featured.map((artwork) => <ArtworkCard key={artwork.id} artwork={artwork} />)}</div> : <EmptyGallery />}
         </section>
 
@@ -81,7 +81,7 @@ export default async function HomePage() {
         </section>
 
         <section className="container section-shell">
-          <SectionHead eyebrow="Browse by tradition" title="Shop by Category" />
+          <SectionHead eyebrow="Material traditions" title="Studies by Form" />
           <div className="responsive-grid swipe-mobile" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
             {categoryFeatures.map(([name, description], index) => (
               <Link key={name} href="/categories" className="category-card card-hover">
@@ -102,9 +102,9 @@ export default async function HomePage() {
           <div className="container responsive-grid" style={{ display: "grid", gridTemplateColumns: "0.78fr 1.22fr", gap: "2rem", alignItems: "center" }}>
             <div>
               <p className="eyebrow">Material memory</p>
-              <h2 className="serif section-title">Discover Benin Bronze Art Styles</h2>
+              <h2 className="serif section-title">Benin Bronze Studies</h2>
               <p className="muted" style={{ lineHeight: 1.85 }}>Explore sculptural works inspired by bronze relief, royal forms, ceremonial memory, and West African metal traditions.</p>
-              <Link className="btn btn-primary" href="/categories">Browse Sculptural Works</Link>
+              <Link className="btn btn-primary" href="/categories">View Sculptural Works</Link>
             </div>
             <div className="grid-cards">
               {(bronzeWorks.length ? bronzeWorks : featured.slice(0, 3)).map((artwork) => <ArtworkCard key={artwork.id} artwork={artwork} />)}
@@ -113,16 +113,14 @@ export default async function HomePage() {
         </section>
 
         <section className="container section-shell">
-          <SectionHead eyebrow="Meaning behind the work" title="Stories & Inspiration" />
+          <SectionHead eyebrow="Meaning behind the work" title="Stories & Provenance" />
           <div className="responsive-grid swipe-mobile" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18 }}>
             {(storyWorks.length ? storyWorks : featured.slice(0, 3)).map((art) => (
               <Link key={art.id} href={`/artwork/${art.slug || art.id}`} className="story-card card-hover">
-                {/* Image backdrop */}
                 <div className="story-card-img">
-                  <img src={art.image_url} alt="" aria-hidden="true" />
+                  <Image src={art.image_url} alt="" aria-hidden="true" fill sizes="300px" style={{ objectFit: "cover" }} />
                   <div className="story-card-gradient" />
                 </div>
-                {/* Text overlay */}
                 <div className="story-card-body">
                   <p className="eyebrow" style={{ color: "var(--gold)", marginBottom: "0.5rem" }}>{art.cultural_roots ?? "Cultural Story"}</p>
                   <h3 className="serif" style={{ fontWeight: 400, fontSize: "1.4rem", color: "var(--cream)", margin: "0 0 0.7rem", lineHeight: 1.2 }}>{art.title}</h3>
@@ -137,13 +135,13 @@ export default async function HomePage() {
         </section>
 
         <section className="container section-shell">
-          <SectionHead eyebrow="Collector attention" title="Trending / Popular Artworks" />
-          <div className="grid-cards">{(trending.length ? trending : featured.slice(0, 3)).map((artwork) => <ArtworkCard key={artwork.id} artwork={artwork} />)}</div>
+          <SectionHead eyebrow="Collector's room" title="Collector's Selection" />
+          <div className="grid-cards">{(collectorSelection.length ? collectorSelection : featured.slice(0, 3)).map((artwork) => <ArtworkCard key={artwork.id} artwork={artwork} />)}</div>
         </section>
 
         <section className="adire kente-top section-shell" style={{ background: "var(--panel)", textAlign: "center" }}>
           <div className="container" style={{ position: "relative", zIndex: 1, maxWidth: 760 }}>
-            <p className="eyebrow">Join the Movement</p>
+            <p className="eyebrow">Artist submissions</p>
             <h2 className="serif section-title">Bring your work into the Àṣà gallery</h2>
             <p className="muted" style={{ lineHeight: 1.85 }}>We partner with artists through a curated consignment model that honors the work, the story, and the collector relationship.</p>
             <Link className="btn btn-primary" href="/join">Join Àṣà</Link>
@@ -151,7 +149,7 @@ export default async function HomePage() {
         </section>
 
         <section className="container section-shell">
-          <SectionHead eyebrow="Collector words" title="Testimonials" />
+          <SectionHead eyebrow="Collector words" title="Notes from the Gallery" />
           <div className="responsive-grid swipe-mobile" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18 }}>
             {testimonials.map(([name, role, quote]) => (
               <figure className="testimonial-card" key={name}>

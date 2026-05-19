@@ -1,7 +1,12 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { invalidOrigin, isSameOriginRequest } from "@/lib/admin-auth";
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) {
+    return invalidOrigin();
+  }
+
   const form = await request.formData();
   const token = String(form.get("admin_token") ?? "");
 

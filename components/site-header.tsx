@@ -2,7 +2,7 @@
 
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const links = [
   { href: "/gallery", label: "Gallery" },
@@ -15,6 +15,7 @@ const links = [
 export function SiteHeader() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     fetch("/api/admin/session")
@@ -23,24 +24,40 @@ export function SiteHeader() {
       .catch(() => setIsAdmin(false));
   }, []);
 
-  // Prevent body scroll when menu is open
   useEffect(() => {
     if (menuOpen) {
       document.body.style.overflow = "hidden";
+      closeButtonRef.current?.focus();
     } else {
       document.body.style.overflow = "";
     }
-    return () => { document.body.style.overflow = ""; };
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
   }, [menuOpen]);
 
   return (
     <>
       <header className="kente-top" style={{ position: "sticky", top: 0, zIndex: 20, background: "var(--bg)", borderBottom: "1px solid var(--border)", paddingTop: 5 }}>
         <div className="container" style={{ height: 64, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
-          <Link href="/" style={{ display: "flex", alignItems: "center" }}>
+          <Link href="/" aria-label="Àṣà home" style={{ display: "flex", alignItems: "center" }}>
             <span className="serif" style={{ display: "block", color: "var(--gold)", fontSize: 30, lineHeight: 1 }}>Àṣà</span>
           </Link>
-          <nav className="desktop-nav" style={{ display: "flex", alignItems: "center", gap: 20 }}>
+          <nav aria-label="Primary navigation" className="desktop-nav" style={{ display: "flex", alignItems: "center", gap: 20 }}>
             {links.map((link) => (
               <Link key={link.href} href={link.href} style={{ color: "var(--muted)", fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase" }}>
                 {link.label}
@@ -55,39 +72,45 @@ export function SiteHeader() {
             type="button"
             aria-label={menuOpen ? "Close navigation" : "Open navigation"}
             aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((v) => !v)}
+            aria-controls="mobile-navigation"
+            onClick={() => setMenuOpen((value) => !value)}
             style={{ minHeight: 40, padding: "0.55rem 0.7rem" }}
           >
-            {menuOpen ? <X size={18} /> : <Menu size={18} />}
+            {menuOpen ? <X size={18} aria-hidden="true" /> : <Menu size={18} aria-hidden="true" />}
           </button>
         </div>
       </header>
 
-      {/* Full-screen mobile overlay menu */}
-      <div className={`mobile-overlay-menu${menuOpen ? " open" : ""}`} aria-hidden={!menuOpen}>
+      <div
+        id="mobile-navigation"
+        className={`mobile-overlay-menu${menuOpen ? " open" : ""}`}
+        aria-hidden={!menuOpen}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Site navigation"
+      >
         <div className="mobile-overlay-inner">
-          {/* Header row */}
           <div className="mobile-overlay-header">
             <span className="serif" style={{ color: "var(--gold)", fontSize: 28, lineHeight: 1 }}>Àṣà</span>
             <button
+              ref={closeButtonRef}
               type="button"
               aria-label="Close menu"
               onClick={() => setMenuOpen(false)}
               style={{ background: "none", border: "none", color: "var(--cream)", cursor: "pointer", padding: 4 }}
             >
-              <X size={22} />
+              <X size={22} aria-hidden="true" />
             </button>
           </div>
 
-          {/* Nav links */}
-          <nav className="mobile-overlay-links">
-            {links.map((link, i) => (
+          <nav className="mobile-overlay-links" aria-label="Mobile navigation">
+            {links.map((link, index) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setMenuOpen(false)}
                 className="mobile-overlay-link"
-                style={{ animationDelay: `${i * 60}ms` }}
+                style={{ animationDelay: `${index * 60}ms` }}
               >
                 {link.label}
               </Link>
@@ -99,7 +122,6 @@ export function SiteHeader() {
             ) : null}
           </nav>
 
-          {/* CTA + socials at bottom */}
           <div className="mobile-overlay-footer">
             <Link href="/gallery" className="btn btn-primary" onClick={() => setMenuOpen(false)} style={{ width: "100%", justifyContent: "center", borderRadius: 40, padding: "0.9rem 1.5rem" }}>
               Browse Gallery
@@ -113,4 +135,3 @@ export function SiteHeader() {
     </>
   );
 }
-

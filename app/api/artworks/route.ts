@@ -4,11 +4,14 @@ import { z } from "zod";
 import { AVAILABILITY, PUBLICATION_STATUS } from "@/lib/categories";
 import { slugify } from "@/lib/format";
 import { supabaseAdmin } from "@/lib/supabase";
+import { invalidOrigin, isSameOriginRequest } from "@/lib/admin-auth";
+import { categoryArraySchema, tagArraySchema, validateImageFile } from "@/lib/artwork-validation";
+import { removeArtworkImages, uploadArtworkImage } from "@/lib/storage";
 
 const optionalNumber = z.preprocess((value) => {
   if (value === "" || value == null) return undefined;
   return value;
-}, z.coerce.number().optional());
+}, z.coerce.number().finite().nonnegative().optional());
 
 const artworkSchema = z.object({
   artist_name: z.string().min(1),
@@ -27,16 +30,32 @@ const artworkSchema = z.object({
   cultural_significance: z.string().optional(),
   piece_story: z.string().optional(),
   yoruba_connection: z.string().optional(),
-  tags: z.string().optional(),
-  admin_notes: z.string().optional(),
-  commission_rate: optionalNumber,
+  tags: z.string().max(1200).optional(),
+  admin_notes: z.string().max(4000).optional(),
+  commission_rate: optionalNumber.refine((value) => value == null || value <= 100, "Commission cannot exceed 100."),
   availability: z.enum(AVAILABILITY),
   publication_status: z.enum(PUBLICATION_STATUS),
   intent_status: z.enum(PUBLICATION_STATUS).optional(),
-  categories: z.string().default("[]")
+  categories: z.string().default("[]").transform((value, ctx) => {
+    try {
+      const parsed = categoryArraySchema.parse(JSON.parse(value));
+      return parsed;
+    } catch {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Invalid categories." });
+      return z.NEVER;
+    }
+  })
 });
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) {
+    return invalidOrigin();
+  }
+
+  const uploadedPaths: string[] = [];
+  const bucket = process.env.SUPABASE_STORAGE_BUCKET ?? "artworks";
+  const supabase = supabaseAdmin();
+
   try {
     const form = await request.formData();
     const token = String(form.get("admin_token") ?? "");
@@ -46,21 +65,49 @@ export async function POST(request: Request) {
     }
 
     const image = form.get("image");
-    if (!(image instanceof File) || !image.type.startsWith("image/")) {
+    if (!(image instanceof File)) {
       return NextResponse.json({ error: "A valid artwork image is required." }, { status: 400 });
     }
 
-    const parsed = artworkSchema.parse(Object.fromEntries(form));
-    const categories = JSON.parse(parsed.categories) as string[];
-    const supabase = supabaseAdmin();
-    const bucket = process.env.SUPABASE_STORAGE_BUCKET ?? "artworks";
-    const imageUrl = await uploadImage(supabase, bucket, image);
+    const imageError = validateImageFile(image, "Artwork image");
+    if (imageError) {
+      return NextResponse.json({ error: imageError }, { status: 400 });
+    }
+
     const artistImage = form.get("artist_image");
-    const artistImageUrl = artistImage instanceof File && artistImage.size > 0 ? await uploadImage(supabase, bucket, artistImage) : null;
-    const extraImageUrls = await Promise.all([0, 1, 2, 3].map(async (index) => {
-      const extra = form.get(`extra_image_${index}`);
-      if (!(extra instanceof File) || extra.size === 0) return null;
-      return uploadImage(supabase, bucket, extra);
+    let artistImageUrl: string | null = null;
+    const extraImages = [0, 1, 2, 3]
+      .map((index) => ({ index, file: form.get(`extra_image_${index}`) }))
+      .filter((item): item is { index: number; file: File } => item.file instanceof File && item.file.size > 0);
+
+    if (artistImage instanceof File && artistImage.size > 0) {
+      const error = validateImageFile(artistImage, "Artist image");
+      if (error) {
+        return NextResponse.json({ error }, { status: 400 });
+      }
+    }
+
+    for (const { index, file } of extraImages) {
+      const error = validateImageFile(file, `Additional image ${index + 1}`);
+      if (error) {
+        return NextResponse.json({ error }, { status: 400 });
+      }
+    }
+
+    const parsed = artworkSchema.parse(Object.fromEntries(form));
+    const imageUpload = await uploadArtworkImage(supabase, bucket, image);
+    uploadedPaths.push(imageUpload.path);
+
+    if (artistImage instanceof File && artistImage.size > 0) {
+      const upload = await uploadArtworkImage(supabase, bucket, artistImage);
+      uploadedPaths.push(upload.path);
+      artistImageUrl = upload.url;
+    }
+
+    const extraImageUrls = await Promise.all(extraImages.map(async ({ file }) => {
+      const upload = await uploadArtworkImage(supabase, bucket, file);
+      uploadedPaths.push(upload.path);
+      return upload.url;
     }));
     const baseSlug = slugify(parsed.title);
     const slug = `${baseSlug}-${crypto.randomUUID().slice(0, 8)}`;
@@ -90,14 +137,14 @@ export async function POST(request: Request) {
         artist_quote: parsed.artist_quote || null,
         artist_bio: parsed.artist_bio || null,
         artist_story: parsed.artist_story || null,
-        image_url: imageUrl,
+        image_url: imageUpload.url,
         extra_image_urls: extraImageUrls.filter(Boolean),
-        categories,
+        categories: parsed.categories,
         availability: parsed.availability,
         cultural_significance: parsed.cultural_significance || null,
         piece_story: parsed.piece_story || null,
         yoruba_connection: parsed.yoruba_connection || null,
-        tags: parsed.tags?.split(",").map((tag) => tag.trim()).filter(Boolean) ?? [],
+        tags: tagArraySchema.parse(parsed.tags?.split(",").map((tag) => tag.trim()).filter(Boolean) ?? []),
         commission_rate: parsed.commission_rate ?? null,
         admin_notes: parsed.admin_notes || null,
         publication_status: parsed.intent_status ?? parsed.publication_status,
@@ -109,19 +156,11 @@ export async function POST(request: Request) {
     if (error) throw error;
     return NextResponse.json({ artwork: data }, { status: 201 });
   } catch (error) {
+    await removeArtworkImages(supabase, bucket, uploadedPaths);
     console.error(error);
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: "Invalid artwork data.", details: error.flatten() }, { status: 400 });
+    }
     return NextResponse.json({ error: "Could not save artwork." }, { status: 500 });
   }
-}
-
-async function uploadImage(supabase: ReturnType<typeof supabaseAdmin>, bucket: string, image: File) {
-  const ext = image.name.split(".").pop() || "webp";
-  const path = `${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage
-    .from(bucket)
-    .upload(path, image, { contentType: image.type, upsert: false });
-
-  if (error) throw error;
-  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-  return data.publicUrl;
 }

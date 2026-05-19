@@ -20,7 +20,7 @@ export default function AskAIPage() {
     {
       role: "assistant",
       content:
-        "Ẹ káàbọ̀! Welcome to Àṣà. I am Atọ́ka, your AI Art Coach. I am here to help you explore the collection, understand cultural stories, and find art that speaks to you."
+        "Ẹ káàbọ̀! Welcome to Àṣà. I am Atọ́ka, your AI Art Coach. I can help you explore the collection, understand cultural stories, and find art that speaks to you."
     }
   ]);
   const [input, setInput] = useState("");
@@ -40,17 +40,25 @@ export default function AskAIPage() {
     setInput("");
     setLoading(true);
 
-    const res = await fetch("/api/ai", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: next })
-    });
-    const data = await res.json().catch(() => ({}));
-    setMessages((items) => [
-      ...items,
-      { role: "assistant", content: data.reply ?? "I’m having trouble responding right now. Please try again." }
-    ]);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: next })
+      });
+      const data = await res.json().catch(() => ({}));
+      setMessages((items) => [
+        ...items,
+        { role: "assistant", content: data.reply ?? "I’m having trouble responding right now. Please try again." }
+      ]);
+    } catch {
+      setMessages((items) => [
+        ...items,
+        { role: "assistant", content: "I’m having trouble connecting right now. Please try again in a moment." }
+      ]);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -62,8 +70,8 @@ export default function AskAIPage() {
           <h1 className="serif" style={{ fontWeight: 400, fontSize: "2.3rem", margin: "0.6rem 0" }}>Atọ́ka</h1>
           <p className="muted">Ask anything about the collection, Yoruba culture, or personalised recommendations.</p>
         </div>
-        <section className="panel" style={{ display: "flex", flexDirection: "column", height: 540, overflow: "hidden" }}>
-          <div style={{ flex: 1, overflowY: "auto", padding: "1.2rem", display: "grid", alignContent: "start", gap: 14 }}>
+        <section className="panel" style={{ display: "flex", flexDirection: "column", height: 540, overflow: "hidden" }} aria-label="AI art coach chat">
+          <div aria-live="polite" style={{ flex: 1, overflowY: "auto", padding: "1.2rem", display: "grid", alignContent: "start", gap: 14 }}>
             {messages.map((message, index) => (
               <div key={index} style={{ display: "flex", justifyContent: message.role === "user" ? "end" : "start" }}>
                 <p style={{
@@ -83,8 +91,15 @@ export default function AskAIPage() {
             <div ref={bottomRef} />
           </div>
           <div style={{ borderTop: "1px solid var(--border)", display: "flex", gap: 10, padding: "0.9rem" }}>
-            <input className="input" value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => event.key === "Enter" && send()} placeholder="Ask about art, culture, or recommendations..." />
-            <button className="btn btn-primary" onClick={send} disabled={loading || !input.trim()} aria-label="Send"><Send size={16} /></button>
+            <input
+              aria-label="Message Atọ́ka"
+              className="input"
+              value={input}
+              onChange={(event) => setInput(event.target.value)}
+              onKeyDown={(event) => event.key === "Enter" && send()}
+              placeholder="Ask about art, culture, or recommendations..."
+            />
+            <button className="btn btn-primary" onClick={send} disabled={loading || !input.trim()} aria-label="Send"><Send size={16} aria-hidden="true" /></button>
           </div>
         </section>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: "1rem" }}>

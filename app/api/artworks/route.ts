@@ -99,7 +99,6 @@ export async function POST(request: Request) {
     const slug = `${baseSlug}-${crypto.randomUUID().slice(0, 8)}`;
 
     let imageUpload;
-    let fallbackMode = false;
 
     try {
       // 1. Upload main image
@@ -165,9 +164,10 @@ export async function POST(request: Request) {
       if (error) throw error;
       return NextResponse.json({ artwork: data }, { status: 201 });
 
-    } catch (opError: any) {
-      console.warn("Supabase operation failed. Checking network/connectivity...", opError);
-      const errorMsg = String(opError.message || opError || "");
+    } catch (opError) {
+      const err = opError as { name?: string; code?: string; status?: number; message?: string };
+      console.warn("Supabase operation failed. Checking network/connectivity...", err);
+      const errorMsg = String(err.message || err || "");
       const isNetworkError = 
         errorMsg.includes("fetch failed") || 
         errorMsg.includes("EAI_AGAIN") || 
@@ -175,11 +175,11 @@ export async function POST(request: Request) {
         errorMsg.includes("ECONNREFUSED") ||
         errorMsg.includes("aborted") ||
         errorMsg.includes("timeout") ||
-        opError.name === "AbortError" ||
-        opError.code === "EAI_AGAIN" ||
-        opError.code === "ENOTFOUND" ||
-        opError.status === 408 ||
-        opError.message === "FetchError";
+        err.name === "AbortError" ||
+        err.code === "EAI_AGAIN" ||
+        err.code === "ENOTFOUND" ||
+        err.status === 408 ||
+        err.message === "FetchError";
 
       if (isNetworkError) {
         console.log("Database/Network offline. Running simulated mock response...");
@@ -224,7 +224,7 @@ export async function POST(request: Request) {
           message: "Artwork saved in offline simulation mode due to database connectivity issue."
         }, { status: 201 });
       } else {
-        throw opError;
+        throw err;
       }
     }
   } catch (error) {

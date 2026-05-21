@@ -123,9 +123,10 @@ export async function PATCH(
 
     return NextResponse.json({ artwork: data });
 
-  } catch (opError: any) {
-    console.warn("Supabase PATCH operation failed. Checking network/connectivity...", opError);
-    const errorMsg = String(opError.message || opError || "");
+  } catch (opError) {
+    const err = opError as { name?: string; code?: string; status?: number; message?: string };
+    console.warn("Supabase PATCH operation failed. Checking network/connectivity...", err);
+    const errorMsg = String(err.message || err || "");
     const isNetworkError = 
       errorMsg.includes("fetch failed") || 
       errorMsg.includes("EAI_AGAIN") || 
@@ -133,11 +134,11 @@ export async function PATCH(
       errorMsg.includes("ECONNREFUSED") ||
       errorMsg.includes("aborted") ||
       errorMsg.includes("timeout") ||
-      opError.name === "AbortError" ||
-      opError.code === "EAI_AGAIN" ||
-      opError.code === "ENOTFOUND" ||
-      opError.status === 408 ||
-      opError.message === "FetchError";
+      err.name === "AbortError" ||
+      err.code === "EAI_AGAIN" ||
+      err.code === "ENOTFOUND" ||
+      err.status === 408 ||
+      err.message === "FetchError";
 
     if (isNetworkError) {
       console.log("Database/Network offline. Simulating successful mock PATCH update...");
@@ -162,7 +163,7 @@ export async function PATCH(
       if (newImagePath) {
         await removeArtworkImages(supabase, bucket, [newImagePath]);
       }
-      console.error(opError);
+      console.error(err);
       return NextResponse.json({ error: "Could not update artwork." }, { status: 500 });
     }
   }
@@ -224,9 +225,10 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
 
-  } catch (opError: any) {
-    console.warn("Supabase DELETE operation failed. Checking network/connectivity...", opError);
-    const errorMsg = String(opError.message || opError || "");
+  } catch (opError) {
+    const err = opError as { name?: string; code?: string; status?: number; message?: string };
+    console.warn("Supabase DELETE operation failed. Checking network/connectivity...", err);
+    const errorMsg = String(err.message || err || "");
     const isNetworkError = 
       errorMsg.includes("fetch failed") || 
       errorMsg.includes("EAI_AGAIN") || 
@@ -234,11 +236,11 @@ export async function DELETE(
       errorMsg.includes("ECONNREFUSED") ||
       errorMsg.includes("aborted") ||
       errorMsg.includes("timeout") ||
-      opError.name === "AbortError" ||
-      opError.code === "EAI_AGAIN" ||
-      opError.code === "ENOTFOUND" ||
-      opError.status === 408 ||
-      opError.message === "FetchError";
+      err.name === "AbortError" ||
+      err.code === "EAI_AGAIN" ||
+      err.code === "ENOTFOUND" ||
+      err.status === 408 ||
+      err.message === "FetchError";
 
     if (isNetworkError) {
       console.log("Database/Network offline. Simulating successful mock DELETE...");
@@ -248,7 +250,7 @@ export async function DELETE(
         message: "Artwork deleted in offline simulation." 
       });
     } else {
-      console.error(opError);
+      console.error(err);
       return NextResponse.json({ error: "Could not delete artwork." }, { status: 500 });
     }
   }

@@ -44,19 +44,24 @@ function toPublicArtwork(artwork: Omit<Artwork, "commission_rate" | "admin_notes
 export async function listPublishedArtworks() {
   if (!hasSupabaseConfig()) return demoArtworks;
 
-  const supabase = supabaseBrowser();
-  const { data, error } = await supabase
-    .from("artworks")
-    .select(PUBLIC_ARTWORK_COLUMNS)
-    .eq("publication_status", "Published")
-    .order("created_at", { ascending: false });
+  try {
+    const supabase = supabaseBrowser();
+    const { data, error } = await supabase
+      .from("artworks")
+      .select(PUBLIC_ARTWORK_COLUMNS)
+      .eq("publication_status", "Published")
+      .order("created_at", { ascending: false });
 
-  if (error) {
-    console.error(error);
+    if (error) {
+      console.warn("Supabase fetch artworks warning:", error);
+      return demoArtworks;
+    }
+
+    return (data ?? []).map((artwork) => toPublicArtwork(artwork));
+  } catch (err) {
+    console.warn("Exception during fetch published artworks, falling back to demo data:", err);
     return demoArtworks;
   }
-
-  return (data ?? []).map((artwork) => toPublicArtwork(artwork));
 }
 
 // Public-facing artwork fetch — only returns Published artworks
@@ -77,13 +82,13 @@ export async function getArtwork(idOrSlug: string) {
     ).maybeSingle();
 
     if (error) {
-      console.error(error);
+      console.warn("Supabase get artwork warning:", error);
       return null;
     }
 
     return data ? toPublicArtwork(data) : null;
   } catch (err) {
-    console.error(err);
+    console.warn("Exception in getArtwork:", err);
     return null;
   }
 }
@@ -106,13 +111,13 @@ export async function getArtworkAdmin(idOrSlug: string) {
     ).maybeSingle();
 
     if (error) {
-      console.error(error);
+      console.warn("Supabase get artwork admin warning:", error);
       return null;
     }
 
     return data;
   } catch (err) {
-    console.error(err);
+    console.warn("Exception in getArtworkAdmin:", err);
     return null;
   }
 }

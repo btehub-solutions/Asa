@@ -25,8 +25,8 @@ export default async function ArtworkDetailPage({ params }: { params: Promise<{ 
         <Link href="/gallery" className="eyebrow" style={{ display: "inline-block", marginBottom: "1.5rem", color: "var(--muted)" }}>Back to gallery</Link>
         <div className="artwork-layout">
           <div>
-            <div className="panel adire artwork-image-wrapper">
-              <Image src={art.image_url} alt={art.title} width={1100} height={1300} priority className="artwork-image" />
+            <div className="panel adire museum-frame artwork-image-wrapper" style={{ overflow: "hidden" }}>
+              <Image src={art.image_url} alt={art.title} width={1100} height={1300} priority className="artwork-image" style={{ transition: "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)" }} />
             </div>
             {art.extra_image_urls.length ? (
               <div className="artwork-thumbnail-gallery" aria-label="Additional artwork images">
@@ -36,48 +36,70 @@ export default async function ArtworkDetailPage({ params }: { params: Promise<{ 
               </div>
             ) : null}
           </div>
-          <section>
-            <p className="eyebrow">Artwork</p>
-            <h1 className="serif artwork-title">{art.title}</h1>
-            <p className="muted artwork-artist">by {art.artist_name}</p>
+          <section className="animate-fade-in-up">
+            <p className="eyebrow" style={{ color: "var(--gold)" }}>Masterpiece</p>
+            <h1 className="serif artwork-title" style={{ fontSize: "clamp(2.2rem, 5vw, 3.4rem)", marginTop: "0.4rem" }}>{art.title}</h1>
+            <p className="muted artwork-artist" style={{ fontSize: "1.1rem", marginBottom: "1.6rem" }}>by <span style={{ color: "var(--cream)" }}>{art.artist_name}</span></p>
             {art.artist_quote ? (
-              <blockquote className="serif artwork-quote">
+              <blockquote className="serif artwork-quote" style={{ borderLeft: "3px solid var(--gold)", paddingLeft: "1.2rem", color: "var(--gold-light)", fontStyle: "italic", margin: "1.5rem 0", fontSize: "1.1rem", lineHeight: 1.6 }}>
                 “{art.artist_quote}”
               </blockquote>
             ) : null}
-            <div className="artwork-details-list">
+            
+            {/* Museum Catalog Specifications */}
+            <div className="artwork-details-list" style={{ borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", padding: "1.2rem 0", margin: "1.8rem 0", display: "grid", gap: 12 }}>
               {[
                 ["Medium", art.medium],
                 ["Year", art.year_created],
                 ["Dimensions", art.dimensions],
-                ["Availability", art.availability]
               ].filter((item) => item[1]).map(([label, value]) => (
-                <p key={label} style={{ margin: 0, display: "flex", justifyContent: "space-between", gap: 12 }}>
-                  <span className="eyebrow" style={{ color: "var(--muted)" }}>{label}</span>
-                  <span>{value}</span>
-                </p>
+                <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", borderBottom: "1px solid rgba(193, 123, 47, 0.1)", paddingBottom: 6 }}>
+                  <span className="eyebrow" style={{ color: "var(--muted)", fontSize: 10 }}>{label}</span>
+                  <span style={{ fontSize: 14 }}>{value}</span>
+                </div>
               ))}
-              <p style={{ margin: 0, display: "flex", justifyContent: "space-between", gap: 12 }}>
-                <span className="eyebrow" style={{ color: "var(--muted)" }}>Price</span>
-                <span className="serif" style={{ color: "var(--gold-light)", fontSize: "1.45rem" }}>{formatPrice(art.price)}</span>
-              </p>
+              
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(193, 123, 47, 0.1)", paddingBottom: 6 }}>
+                <span className="eyebrow" style={{ color: "var(--muted)", fontSize: 10 }}>Availability</span>
+                <span style={{ 
+                  background: art.availability === "For Sale" ? "rgba(76, 175, 125, 0.15)" : "rgba(255, 180, 168, 0.15)",
+                  border: art.availability === "For Sale" ? "1px solid rgba(76, 175, 125, 0.35)" : "1px solid rgba(255, 180, 168, 0.35)",
+                  borderRadius: 999,
+                  color: art.availability === "For Sale" ? "#4caf7d" : "#ffb4a8",
+                  fontSize: 10,
+                  fontWeight: 600,
+                  letterSpacing: "0.06em",
+                  padding: "0.2rem 0.6rem",
+                  textTransform: "uppercase"
+                }}>
+                  {art.availability}
+                </span>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", paddingTop: 6 }}>
+                <span className="eyebrow" style={{ color: "var(--muted)", fontSize: 10 }}>Price</span>
+                <span className="serif" style={{ color: "var(--gold-light)", fontSize: "1.6rem", textShadow: "0 0 10px rgba(245, 200, 66, 0.15)" }}>{formatPrice(art.price)}</span>
+              </div>
             </div>
-            <div className="artwork-tags">
+
+            <div className="artwork-tags" style={{ marginBottom: "1.6rem" }}>
               {art.categories.map((category) => (
-                <span key={category} style={{ border: "1px solid var(--border)", borderRadius: 999, color: "var(--gold)", fontSize: 12, padding: "0.28rem 0.7rem" }}>{category}</span>
+                <span key={category} className="chip" style={{ borderColor: "rgba(193, 123, 47, 0.25)", color: "var(--gold)", padding: "0.3rem 0.75rem", fontSize: 11 }}>{category}</span>
               ))}
             </div>
             {art.cultural_significance ? <InfoBlock title="Cultural Significance" text={art.cultural_significance} /> : null}
             {art.yoruba_connection ? <InfoBlock title="Yoruba Connection" text={art.yoruba_connection} /> : null}
+            
+            {/* VIP Concierge Acquisition Portal */}
             {art.availability !== "Sold" && art.price != null ? (
-              <div className="panel kente-top mobile-no-panel" style={{ marginTop: "1.5rem", padding: "1.5rem" }}>
-                <p className="eyebrow" style={{ fontSize: "0.75rem", letterSpacing: "0.2em", marginBottom: "0.6rem" }}>Acquire this piece</p>
-                <p className="muted" style={{ lineHeight: 1.6, marginBottom: "1.5rem" }}>
-                  Contact the Àṣà team to reserve this artwork or propose a private offer.
+              <div className="panel kente-top glass-premium mobile-no-panel" style={{ marginTop: "2rem", padding: "1.8rem", borderRadius: 10 }}>
+                <p className="eyebrow" style={{ fontSize: "0.75rem", letterSpacing: "0.2em", marginBottom: "0.6rem", color: "var(--gold-light)" }}>Acquire this masterpiece</p>
+                <p className="muted" style={{ lineHeight: 1.7, marginBottom: "1.6rem", fontSize: 13 }}>
+                  This authentic work is held in our secure collection. Connect with our curatorial team to discuss acquisitions, custom framing, and bespoke global delivery services.
                 </p>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "0.8rem" }}>
-                  <a href={`mailto:hello@asa.com?subject=Inquiry: ${art.title}`} className="btn btn-primary" style={{ width: "100%" }}>Inquire to Buy</a>
-                  <a href={`mailto:hello@asa.com?subject=Offer: ${art.title}`} className="btn btn-ghost" style={{ width: "100%", background: "var(--panel-2)" }}>Make an Offer</a>
+                  <a href={`mailto:hello@asa.com?subject=Acquisition Inquiry: ${art.title}`} className="btn btn-primary" style={{ width: "100%", boxShadow: "0 4px 15px rgba(193,123,47,0.35)" }}>Inquire to Buy</a>
+                  <a href={`mailto:hello@asa.com?subject=Private Offer: ${art.title}`} className="btn btn-ghost" style={{ width: "100%", background: "rgba(28, 15, 5, 0.3)" }}>Propose Private Offer</a>
                 </div>
               </div>
             ) : null}

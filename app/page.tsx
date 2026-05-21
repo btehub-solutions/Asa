@@ -26,38 +26,42 @@ const testimonials = [
 export default async function HomePage() {
   const artworks = await listPublishedArtworks();
   const featured = artworks.slice(0, 6);
-  const collectorSelection = [...artworks].sort((a, b) => (b.price ?? 0) - (a.price ?? 0)).slice(0, 3);
-  const artists = uniqueArtists(artworks).slice(0, 3);
+  const collectorSelection = [...artworks].sort((a, b) => (b.price ?? 0) - (a.price ?? 0)).slice(0, 4);
+  const artists = uniqueArtists(artworks).slice(0, 4);
   const bronzeWorks = artworks.filter((art) =>
     art.categories.some((category) => category.toLowerCase().includes("bronze") || category.toLowerCase().includes("sculpt"))
-  ).slice(0, 3);
-  const storyWorks = artworks.filter((art) => art.piece_story || art.cultural_significance || art.yoruba_connection).slice(0, 3);
+  ).slice(0, 4);
+  const storyWorks = artworks.filter((art) => art.piece_story || art.cultural_significance || art.yoruba_connection).slice(0, 4);
 
   return (
     <>
       <SiteHeader />
-      <section className="adire kente-top bronze-glow" style={{ borderBottom: "1px solid var(--border)", minHeight: "calc(100vh - 72px)", display: "grid", placeItems: "center", padding: "5.5rem 1rem 4.5rem" }}>
-        <div className="container responsive-grid" style={{ display: "grid", gridTemplateColumns: "1.05fr 0.95fr", gap: "3rem", alignItems: "center", position: "relative", zIndex: 1 }}>
+      <section className="hero-section adire kente-top bronze-glow">
+        <div className="container hero-layout-grid">
           <div>
-            <p className="eyebrow">Ona Ibile · Curated African Art</p>
-            <h1 className="serif" style={{ fontSize: "clamp(3rem, 8vw, 6.8rem)", fontWeight: 400, lineHeight: 0.98, margin: "1rem 0" }}>
-              Where Art Speaks <em style={{ color: "var(--gold)", display: "block" }}>Culture</em>
+            <p className="eyebrow" style={{ animation: "fadeInUp 0.6s ease" }}>Ona Ibile · Curated African Art</p>
+            <h1 className="serif hero-title">
+              Where Art Speaks <em className="text-gold-gradient">Culture</em>
             </h1>
-            <p className="muted" style={{ maxWidth: 620, fontSize: "1.12rem", lineHeight: 1.85 }}>
-              A curated marketplace celebrating African art and heritage, from Ile-Ife to the world.
+            <p className="muted hero-subtitle">
+              A curated marketplace celebrating African art and heritage, from Abeokuta to the world.
             </p>
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: "2rem" }}>
-              <Link className="btn btn-primary" href="/gallery">Browse Gallery</Link>
+            <div className="hero-buttons">
+              <Link className="btn btn-primary" href="/gallery" style={{ boxShadow: "0 4px 20px rgba(193,123,47,0.3)" }}>Browse Gallery</Link>
               <Link className="btn btn-ghost" href="/ask-ai">Ask Atọ́ka</Link>
             </div>
           </div>
-          <div className="wood-frame" style={{ border: "1px solid var(--border-strong)", borderRadius: 10, padding: 14, background: "rgba(28, 15, 5, 0.62)" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 0.74fr", gap: 12 }}>
+          <div className="wood-frame glass-premium hero-artworks-wrapper">
+            <div className="hero-artworks-grid">
               {featured.slice(0, 3).map((art, index) => (
-                <Link key={art.id} href={`/artwork/${art.slug || art.id}`} className="panel card-hover" style={{ minHeight: index === 0 ? 360 : 174, gridRow: index === 0 ? "span 2" : undefined, overflow: "hidden", position: "relative" }}>
-                  <Image src={art.image_url} alt={art.title} fill sizes="420px" style={{ objectFit: "contain" }} />
-                  <span style={{ background: "linear-gradient(transparent, rgba(28,15,5,0.92))", inset: 0, position: "absolute" }} />
-                  <span className="serif" style={{ bottom: 16, color: "var(--cream)", fontSize: index === 0 ? 25 : 16, left: 16, position: "absolute", right: 16 }}>{art.title}</span>
+                <Link
+                  key={art.id}
+                  href={`/artwork/${art.slug || art.id}`}
+                  className={`panel card-hover hero-artwork-link ${index === 0 ? "large-frame museum-frame" : "small-frame"}`}
+                >
+                  <Image src={art.image_url} alt={art.title} fill sizes="420px" style={{ objectFit: "cover" }} />
+                  <span style={{ background: "linear-gradient(transparent, rgba(28,15,5,0.95))", inset: 0, position: "absolute", zIndex: 1 }} />
+                  <span className="serif" style={{ bottom: 16, color: "var(--cream)", fontSize: index === 0 ? 24 : 15, left: 16, position: "absolute", right: 16, zIndex: 2, textShadow: "0 2px 5px rgba(0,0,0,0.7)" }}>{art.title}</span>
                 </Link>
               ))}
             </div>
@@ -74,7 +78,7 @@ export default async function HomePage() {
         <section className="section-shell" style={{ background: "linear-gradient(180deg, rgba(46,26,10,0.36), transparent)" }}>
           <div className="container">
             <SectionHead eyebrow="Featured voices" title="Yoruba & African Artists" />
-            <div className="responsive-grid swipe-mobile" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18 }}>
+            <div className="grid-cards swipe-mobile">
               {artists.map((artist) => <ArtistCard key={artist.name} artist={artist} />)}
             </div>
           </div>
@@ -82,7 +86,7 @@ export default async function HomePage() {
 
         <section className="container section-shell">
           <SectionHead eyebrow="Material traditions" title="Studies by Form" />
-          <div className="responsive-grid swipe-mobile" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+          <div className="grid-cards swipe-mobile">
             {categoryFeatures.map(([name, description], index) => (
               <Link key={name} href="/categories" className="category-card card-hover">
                 <span className="category-card-num serif">{String(index + 1).padStart(2, "0")}</span>
@@ -107,15 +111,15 @@ export default async function HomePage() {
               <Link className="btn btn-primary" href="/categories">View Sculptural Works</Link>
             </div>
             <div className="grid-cards">
-              {(bronzeWorks.length ? bronzeWorks : featured.slice(0, 3)).map((artwork) => <ArtworkCard key={artwork.id} artwork={artwork} />)}
+              {(bronzeWorks.length ? bronzeWorks : featured.slice(0, 4)).map((artwork) => <ArtworkCard key={artwork.id} artwork={artwork} />)}
             </div>
           </div>
         </section>
 
         <section className="container section-shell">
           <SectionHead eyebrow="Meaning behind the work" title="Stories & Provenance" />
-          <div className="responsive-grid swipe-mobile" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18 }}>
-            {(storyWorks.length ? storyWorks : featured.slice(0, 3)).map((art) => (
+          <div className="grid-cards swipe-mobile">
+            {(storyWorks.length ? storyWorks : featured.slice(0, 4)).map((art) => (
               <Link key={art.id} href={`/artwork/${art.slug || art.id}`} className="story-card card-hover">
                 <div className="story-card-img">
                   <Image src={art.image_url} alt="" aria-hidden="true" fill sizes="300px" style={{ objectFit: "cover" }} />
@@ -136,7 +140,7 @@ export default async function HomePage() {
 
         <section className="container section-shell">
           <SectionHead eyebrow="Collector's room" title="Collector's Selection" />
-          <div className="grid-cards">{(collectorSelection.length ? collectorSelection : featured.slice(0, 3)).map((artwork) => <ArtworkCard key={artwork.id} artwork={artwork} />)}</div>
+          <div className="grid-cards">{(collectorSelection.length ? collectorSelection : featured.slice(0, 4)).map((artwork) => <ArtworkCard key={artwork.id} artwork={artwork} />)}</div>
         </section>
 
         <section className="adire kente-top section-shell" style={{ background: "var(--panel)", textAlign: "center" }}>
@@ -150,7 +154,7 @@ export default async function HomePage() {
 
         <section className="container section-shell">
           <SectionHead eyebrow="Collector words" title="Notes from the Gallery" />
-          <div className="responsive-grid swipe-mobile" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 18 }}>
+          <div className="grid-cards swipe-mobile">
             {testimonials.map(([name, role, quote]) => (
               <figure className="testimonial-card" key={name}>
                 <span className="testimonial-quote-mark" aria-hidden="true">“</span>

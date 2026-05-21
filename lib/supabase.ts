@@ -35,12 +35,33 @@ export function hasSupabaseConfig() {
 
 export function supabaseBrowser() {
   if (!url || !anonKey) throw new Error("Missing Supabase public environment variables.");
-  return createClient<Database>(url, anonKey);
+  return createClient<Database>(url, anonKey, {
+    global: {
+      fetch: (input, init) => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+        return fetch(input, {
+          ...init,
+          signal: controller.signal
+        }).finally(() => clearTimeout(timeoutId));
+      }
+    }
+  });
 }
 
 export function supabaseAdmin() {
   if (!url || !serviceKey) throw new Error("Missing Supabase admin environment variables.");
   return createClient<Database>(url, serviceKey, {
-    auth: { persistSession: false, autoRefreshToken: false }
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: {
+      fetch: (input, init) => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+        return fetch(input, {
+          ...init,
+          signal: controller.signal
+        }).finally(() => clearTimeout(timeoutId));
+      }
+    }
   });
 }

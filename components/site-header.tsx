@@ -52,14 +52,14 @@ export function SiteHeader() {
 
   return (
     <>
-      <header className="kente-top" style={{ position: "sticky", top: 0, zIndex: 20, background: "var(--bg)", borderBottom: "1px solid var(--border)", paddingTop: 5 }}>
-        <div className="container" style={{ height: 64, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+      <header className="kente-top site-header">
+        <div className="container site-header-container" style={{ height: 64, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
           <Link href="/" aria-label="Àṣà home" style={{ display: "flex", alignItems: "center" }}>
             <span className="serif" style={{ display: "block", color: "var(--gold)", fontSize: 30, lineHeight: 1 }}>Àṣà</span>
           </Link>
-          <nav aria-label="Primary navigation" className="desktop-nav" style={{ display: "flex", alignItems: "center", gap: 20 }}>
+          <nav aria-label="Primary navigation" className="desktop-nav" style={{ display: "flex", alignItems: "center", gap: 24 }}>
             {links.map((link) => (
-              <Link key={link.href} href={link.href} style={{ color: "var(--muted)", fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase" }}>
+              <Link key={link.href} href={link.href} className="desktop-nav-link">
                 {link.label}
               </Link>
             ))}

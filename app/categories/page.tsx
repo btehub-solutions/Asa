@@ -12,7 +12,7 @@ export default async function CategoriesPage() {
   return (
     <>
       <SiteHeader />
-      <main className="container" style={{ padding: "3.2rem 0 5rem" }}>
+      <main className="container" style={{ paddingTop: "3.2rem", paddingBottom: "5rem" }}>
         <p className="eyebrow">Browse</p>
         <h1 className="serif" style={{ fontSize: "2.4rem", fontWeight: 400, margin: "0.6rem 0" }}>Shop by Category</h1>
         <p className="muted" style={{ maxWidth: 620, lineHeight: 1.8 }}>Explore artworks by style, tradition, and medium.</p>

@@ -116,13 +116,14 @@ export function GalleryClient({ initialArtworks }: { initialArtworks: Artwork[] 
         <div style={{ display: "flex", gap: 12, width: "100%", alignItems: "center", flexWrap: "wrap" }}>
           {/* Live Search Bar */}
           <div style={{ position: "relative", flex: 1, minWidth: 260 }}>
-            <Search size={16} color="var(--gold)" style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }} />
+            <Search size={16} color="var(--gold)" style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }} aria-hidden="true" />
             <input
               type="text"
               className="input input-premium"
               placeholder="Search by masterpiece title, artist, or medium..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              aria-label="Search masterpieces"
               style={{ paddingLeft: "2.6rem", background: "rgba(28, 15, 5, 0.4)", borderRadius: 6 }}
             />
           </div>

@@ -7,7 +7,7 @@
   --gold: #c17b2f;
   --gold-light: #f5c842;
   --cream: #f7edd8;
-  --muted: #c9b99a;
+  --muted: #dcd0b9;
   --border: rgba(193, 123, 47, 0.3);
   --border-strong: rgba(193, 123, 47, 0.6);
   --green: #1a3a2a;
@@ -246,7 +246,8 @@ select {
 }
 
 .input:focus {
-  border-color: var(--gold);
+  border-color: var(--gold-light) !important;
+  box-shadow: 0 0 0 2px rgba(245, 200, 66, 0.25) !important;
   outline: none;
 }
 
@@ -1222,8 +1223,9 @@ select {
   transition: border-color 200ms ease, box-shadow 200ms ease;
 }
 .input-premium:focus {
-  border-color: var(--gold-light);
-  box-shadow: 0 0 0 1px rgba(245, 200, 66, 0.15);
+  border-color: var(--gold-light) !important;
+  box-shadow: 0 0 0 2px rgba(245, 200, 66, 0.25) !important;
+  outline: none;
 }
 
 .animate-spin {
@@ -1596,6 +1598,30 @@ select {
     animation-iteration-count: 1 !important;
     transition-duration: 0s !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* ── Keyboard Accessibility Focus Indicators ── */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--gold-light) !important;
+  outline-offset: 3px !important;
+}
+
+/* ── Backdrop-Filter Fallback for Glassmorphic Elements ── */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-premium {
+    background: rgba(36, 21, 8, 0.95) !important;
+  }
+  .site-header {
+    background: rgba(18, 16, 13, 0.98) !important;
+  }
+  .mobile-overlay-menu {
+    background: rgba(18, 16, 13, 0.98) !important;
   }
 }
 
